@@ -1,0 +1,35 @@
+/* QSS中不能用双斜杠的注释这会导致qss无效 */
+QScrollBar:vertical {
+   border: 0px;
+   background: #202020;
+   width: 8px; /*设置一个非0的宽度让滚动条显示*/
+   margin: 0;
+   padding:0;
+}
+/*滑块的样式*/
+QScrollBar::handle:vertical {
+   border: 0; /*设置border-radius属性并不需要border属性有值*/
+   background: rgba(70,70,70,85%);
+   min-height: 20px;
+   border-radius:4px; /*坑：这个圆角要注意，不能超过宽度的一半，否则没有圆角效果*/
+}
+/*鼠标放上滑块的样式,颜色透明度变一下*/
+QScrollBar::handle:vertical:hover {
+   border: 0;
+   background: rgba(70,70,70,100%);
+   min-height: 20px;
+   border-radius:4px;
+}
+QScrollBar::add-line:vertical,QScrollBar::sub-line:vertical {
+   border: 0;
+   background: #202020;
+   height: 20px;
+   subcontrol-position: bottom;
+   subcontrol-origin: margin;
+}
+/*这两个属性必须都要设置否则背景不会继承基础设置中的背景*/
+QScrollBar::add-page:vertical,QScrollBar::sub-page:vertical
+{
+    background:#202020;
+}
+
