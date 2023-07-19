@@ -12,13 +12,13 @@ class ImageDataInfo
 {
 public:
     ImageDataInfo();
-
     QString getPhotoName() const{ return mPhotoName; }
     QString getPath() const { return mPath; }
     void setPhotoName(const QString &newPhotoName){ mPhotoName = newPhotoName; }
     void setPath(const QString &newPath){ mPath = newPath; }
 
 private:
+    QByteArray mImageData; // 图片的二进制数据
     QString mPhotoName;
     QString mPath;
 };

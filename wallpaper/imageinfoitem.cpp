@@ -68,7 +68,7 @@ void ImageInfoItem::addImage()
     QFont font("微软雅黑 ", 15); // 创建字体对象，Arial 字体，大小为 12
     mImageInfo->setFont(font);
     mImageInfo->setStyleSheet("color: gray;");
-    mImageInfo->setText(mPath); // 设置嵌套文本
+    mImageInfo->setText(mImageName); // 设置嵌套文本
     mImageInfo->setGeometry(0, 160, 250, 30); // 设置嵌套标签的位置和大小
     mImageInfo->setAlignment(Qt::AlignLeft); // 设置对齐方式
     mImageInfo->setVisible(false); // 当鼠标触碰才会看见
