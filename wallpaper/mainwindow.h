@@ -34,6 +34,8 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    static const int smVisibleButtonCount = 7;
+
     void initListWigdet();
     void addImageToListWidget();
     void updateListWidget(int page);
@@ -43,8 +45,10 @@ protected:
     virtual void mouseMoveEvent(QMouseEvent *event);
     virtual void mouseReleaseEvent(QMouseEvent *event);
 private:
-    void initPagingButton();
-    void changePagingButton();
+    void clearPaingLayout();
+    void changePagingButton(const int clickedId);
+    void curPaging(const int clickedId);
+
 
 private slots:
     void clickPagingButton();
@@ -52,10 +56,15 @@ private slots:
 private:
     Ui::MainWindow *ui;
 
-    DataManager *mDataManager;
+    DataManager *mDataManager; // 获取壁纸信息的类
     bool m_moveing;
     QPoint m_movePosition;
     QList<QPushButton*> mButtonList; //按钮列表，保存分页按钮
+    QList<QPushButton*> mUseButtonList; //保存分页控件中需要用到的按钮
+    // 创建省略号按钮，
+    QPushButton *mEllipsisButtonLeft;
+    QPushButton *mEllipsisButtonRight;
+
     QHBoxLayout* mLayout; //水平显示 分页按钮
 
 };

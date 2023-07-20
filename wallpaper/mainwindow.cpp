@@ -8,6 +8,8 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
     , mDataManager(new DataManager)
     , mLayout(nullptr)
+    , mEllipsisButtonLeft(new QPushButton("left..."))
+    , mEllipsisButtonRight(new QPushButton("right..."))
 {
     ui->setupUi(this);
     //去掉软件标题栏，自己来实现  Qt::FramelessWindowHint
@@ -16,11 +18,16 @@ MainWindow::MainWindow(QWidget *parent)
     //    setAttribute(Qt::WA_TranslucentBackground,true);
     setWindowFlags(Qt::FramelessWindowHint | Qt::WindowSystemMenuHint | Qt::WindowMinimizeButtonHint);
     setWindowIcon(QIcon(":/images/title.png"));//可执行程序图标
-\
-    mLayout = new QHBoxLayout(ui->tool);
+    \
+        mLayout = new QHBoxLayout(ui->tool);
     ui->tool->setLayout(mLayout);
     mLayout->setAlignment(Qt::AlignLeft); // 分页按钮向左对齐
 
+    // 不可点击
+    mEllipsisButtonLeft->setEnabled(false);
+    mEllipsisButtonRight->setEnabled(false);
+    mEllipsisButtonLeft->setFixedSize(40, 40); // 设置按钮大小
+    mEllipsisButtonRight->setFixedSize(40, 40); // 设置按钮大小
 
     initListWigdet();//初始化QlistWidget
     addImageToListWidget();// 添加壁纸到QListWidget中，需要用到DataManager::mTotalPage
@@ -29,6 +36,12 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
+    delete mEllipsisButtonRight;
+    delete mEllipsisButtonLeft;
+    for(auto &button: mButtonList){
+        delete button;
+    }
+
     delete mDataManager;
     delete ui;
 }
@@ -66,7 +79,6 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event)
     QWidget::mouseReleaseEvent(event);
 }
 
-
 void MainWindow::initListWigdet(){
     //    QFile file2(":/qss/scrollbar.qss");
     //    file2.open(QFile::ReadOnly);
@@ -91,7 +103,7 @@ void MainWindow::initListWigdet(){
     ui->listWidget->setFocusPolicy(Qt::NoFocus);//文字没虚线
     ui->listWidget->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 
-    connect(ui->listWidget,SIGNAL(itemClicked(QListWidgetItem*)),this,SLOT(listWidgetClicked(QListWidgetItem*)));
+    //    connect(ui->listWidget,SIGNAL(itemClicked(QListWidgetItem*)),this,SLOT(listWidgetClicked(QListWidgetItem*)));
 }
 
 void MainWindow::addImageToListWidget()
@@ -106,9 +118,15 @@ void MainWindow::addImageToListWidget()
         // 每页创建一个按钮
         QPushButton* button = new QPushButton(QString::number(n));// 按钮以页数命名
         button->setFixedSize(40, 40); // 设置按钮大小
+        // 设置样式表
+        button->setStyleSheet("QPushButton:pressed {"
+                              "    background-color: darkblue;"
+                              "    color: white;"
+                              "}");
 
         //绑定分页按钮点击事件
         QObject::connect(button, &QPushButton::clicked, this, &MainWindow::clickPagingButton);
+        button->setVisible(false);
         mButtonList.append(button); // buttonList.push_back(button)，将按钮添加到按钮列表末尾
 
         // 创建单元项
@@ -127,12 +145,10 @@ void MainWindow::addImageToListWidget()
             //将ImageInfoItem部件与相应的QListWidgetItem关联起来
             ui->listWidget->setItemWidget(item, widget);
         }
-
     }
 
     // 设置按钮在分页中默认的显示规则
-    initPagingButton();
-    ui->tool->setLayout(mLayout);
+    changePagingButton(1);
     // 给item绑定真实数据,默认更新第一页的数据
     updateListWidget(1);
 }
@@ -167,91 +183,95 @@ void MainWindow::updateListWidget(int page){
     }
 }
 
-void MainWindow::initPagingButton()
-{
-    // 创建省略号按钮
-    QPushButton *ellipsisButtonLeft = new QPushButton("...");
-    QPushButton *ellipsisButtonRight = new QPushButton("...");
-    // 不可点击
-    ellipsisButtonLeft->setEnabled(false);
-    ellipsisButtonRight->setEnabled(false);
-
-    // 按钮列表中设置显示7个
-    int visibleButtonCount = 7;
-    // 一共多少个按钮，就有多少页壁纸
-    int buttonCount = mButtonList.count();
-    // 一共只有小于等于7页壁纸
-    if(buttonCount <= visibleButtonCount){
-        for(int i = 0; i < buttonCount; ++i){
-            mLayout->addWidget(mButtonList[i]);
-        }
-    } else{
-
-        // 默认第一页的样式，显示1-6和最后一个按钮
-        for(int i = 0; i < visibleButtonCount - 1; ++i){
-            mLayout->addWidget(mButtonList[i]);// 添加按钮到布局
-        }
-        mLayout->addWidget(ellipsisButtonLeft); // 6之后添加省略按钮
-        mLayout->addWidget(mButtonList[buttonCount - 1]);// 添加最后一个按钮
-    }
-
-    //    // 点击第几页的按钮，就将该页的值传入槽函数中，该页的值就是按钮的名字
-    //    // 连接点击信号槽函数，点击第几页的按钮，就显示第几页的壁纸
-    //    QObject::connect(button, &QPushButton::clicked, this, [&]() {
-    //        // 保存点击按钮的索引
-    //        int clickedIndex = n + 1;
-
-    //        // 更新对应页数的壁纸
-    //        mDataManager->setCurPage(clickedIndex);
-    //        updateListWidget(mDataManager->curPage());
-
-    //        // 显示相邻的按钮
-    //        int startIndex = qMax(0, clickedIndex - 1);
-    //        int endIndex = qMin(pages - 1, clickedIndex + 1);
-
-    //        for (int j = startIndex; j <= endIndex; j++) {
-    //            if(j > 0 && j < pages){
-    //                buttonList.at(j)->show();
-    //            }
-    //        }
-
-    //        // 隐藏其他按钮，除了1和末尾和 【startInedx，endIndex】区间的按钮
-    //        for (int j = 1; j < pages - 1; j++) {
-    //            if (j < startIndex || j > endIndex) {
-    //                buttonList.at(j)->hide();
-    //            }
-    //        }
-    //        // 显示省略号按钮
-    //        if (startIndex > 1) {
-    //            ellipsisButton->show();
-    //        } else {
-    //            ellipsisButton->hide();
-    //        }
-    //        if (endIndex < pages - 2) {
-    //            buttonList.at(pages - 2)->show();
-    //        } else {
-    //            buttonList.at(pages - 2)->hide();
-    //        }
-    //    });
-}
-
-void MainWindow::changePagingButton()
-{
-
-}
-
 void MainWindow::clickPagingButton()
 {
     QPushButton* button = qobject_cast<QPushButton*>(sender()); // 获取发出信号的按钮
     if(button){
         // 更新对应页数的壁纸
         QString buttonText = button->text();
-        int clickedIndex = buttonText.toInt(); // 获取点击的第几页
-        mDataManager->setCurPage(clickedIndex);
+        int clickedId = buttonText.toInt(); // 获取点击的第几页
+        mDataManager->setCurPage(clickedId);
         updateListWidget(mDataManager->curPage());
 
         // 更改分页工具栏的样式
-        changePagingButton();
+        changePagingButton(clickedId);
+    }
+}
+
+void MainWindow::changePagingButton(const int clickedId)
+{
+    clearPaingLayout(); // 清空当前布局mLayout中的Button
+    curPaging(clickedId);// 获取当前布局需要的按钮
+    int count = mUseButtonList.count();
+    qDebug() << "mUseButtonList的长度为：" << count;
+    for(int i = 0; i < count ; ++i){
+        mUseButtonList[i]->setVisible(true);
+        mLayout->addWidget(mUseButtonList[i]);
+        qDebug() << mUseButtonList[i]->text();
+    }
+    ui->tool->setLayout(mLayout);
+}
+
+void MainWindow::clearPaingLayout() // 去除layout中的按钮列表
+{
+    for (int i = 0; i < mButtonList.count(); ++i) {
+        if (mLayout->indexOf(mButtonList[i]) != -1) {
+            mLayout->removeWidget(mButtonList[i]);
+            mButtonList[i]->setVisible(false);
+        }
+    }
+    if (mLayout->indexOf(mEllipsisButtonLeft) != -1){
+        mLayout->removeWidget(mEllipsisButtonLeft);
+        mEllipsisButtonLeft->setVisible(false);
+    }
+    if (mLayout->indexOf(mEllipsisButtonRight) != -1){
+        mLayout->removeWidget(mEllipsisButtonRight);
+        mEllipsisButtonLeft->setVisible(false);
+    }
+
+}
+
+void MainWindow::curPaging(const int clickedId){
+//    for(const auto& i: mButtonList){
+//        qDebug() << i->text() << " ";
+//    }
+
+    mUseButtonList.clear();
+    // 按钮列表中设置显示smVisibleButtonCount个
+    int visibleButtonCount = smVisibleButtonCount;
+    // 一共多少个按钮，就有多少页壁纸
+    int buttonCount = mButtonList.count();
+
+    // 如果可见按钮的数量比总页数还大，显示所有的按钮，不需要省略号按钮
+    if(buttonCount <= visibleButtonCount){
+        mUseButtonList = mButtonList;
+    }
+
+    if(clickedId <= visibleButtonCount / 2 + 1){ // 需要右省略号按钮（出现在点击按钮的右边）
+        // 省略号左边的按钮
+        for(int i = 0; i < visibleButtonCount - 1; ++i){
+            mUseButtonList.append(mButtonList[i]);
+            qDebug() << mButtonList[i]->text();
+        }
+        mUseButtonList.append(mEllipsisButtonRight);// 添加右省略按钮
+        mUseButtonList.append(mButtonList.last());
+
+    } else if(clickedId >= buttonCount - (visibleButtonCount / 2)){ // 需要左省略号按钮（出现在点击按钮的左边）
+        mUseButtonList.append(mButtonList.first());
+        mUseButtonList.append(mEllipsisButtonLeft);
+        for(int i = buttonCount - visibleButtonCount + 1; i < buttonCount; ++i){
+            mUseButtonList.append(mButtonList[i]);
+            qDebug() << mButtonList[i]->text();
+        }
+    } else { //两个按钮都需要
+        mUseButtonList.push_back(mButtonList[0]); // 添加1号按钮
+        mUseButtonList.push_back(mEllipsisButtonLeft);// 添加左省略号按钮
+        for(int i = clickedId - visibleButtonCount / 2; i <= clickedId +1; ++i){
+            mUseButtonList.push_back(mButtonList[i]);
+            qDebug() << mButtonList[i]->text();
+        }
+        mUseButtonList.push_back(mEllipsisButtonRight);// 添加右省略号按钮
+        mUseButtonList.push_back(mButtonList[buttonCount - 1]);
     }
 }
 

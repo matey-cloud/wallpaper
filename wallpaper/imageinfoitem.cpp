@@ -96,14 +96,18 @@ void ImageInfoItem::contextMenuEvent(QContextMenuEvent *event) {
 void ImageInfoItem::setWallPaper()
 {
     // 壁纸注册表
+
     QSettings wallpaperSettings("HKEY_CURRENT_USER\\Control Panel\\Desktop", QSettings::NativeFormat);
+
     wallpaperSettings.setValue("Wallpaper", mPath);
     wallpaperSettings.setValue("WallpaperStyle", 2);  // 2 表示拉伸平铺
     wallpaperSettings.setValue("TileWallpaper", 0);
     wallpaperSettings.sync();
 
-    SystemParametersInfoA(SPI_SETDESKWALLPAPER, 0, (PVOID)mPath.toStdString().c_str(), SPIF_UPDATEINIFILE);
-
+    std::wstring wPath = mPath.toStdWString();
+    SystemParametersInfoW(SPI_SETDESKWALLPAPER, 0, (PVOID)wPath.c_str(), SPIF_UPDATEINIFILE);
+//    SystemParametersInfoA(SPI_SETDESKWALLPAPER, 0, (PVOID)mPath.toStdString().c_str(), SPIF_UPDATEINIFILE);
+//    qDebug() << "要设置为壁纸的文件路径" << (PVOID)mPath.toStdString().c_str();
 }
 
 //重写鼠标按下事件

@@ -9,6 +9,7 @@
 #include <QString>
 #include <QList>
 #include <QFileInfo>
+#include <QDir>
 
 #include "imagedatainfo.h"
 

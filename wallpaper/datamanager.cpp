@@ -15,31 +15,36 @@ DataManager::DataManager()
 
 void DataManager::getImages()
 {
-    // 图片路径列表
-    QStringList imagePathList = {
-        "D:/CandC++/C++/wallpaper/images/Itachi.jpg",
-        "D:\\CandC++\\C++\\wallpaper\\images\\Naruto.jpg",
-        "D:\\CandC++\\C++\\wallpaper\\images\\Obitu.jpg",
-        "D:\\CandC++\\C++\\wallpaper\\images\\Madara.jpg",
-        "D:\\CandC++\\C++\\wallpaper\\images\\preview.jpg",
-        "D:\\CandC++\\C++\\wallpaper\\images\\海上倒影.jpg",
-        "D:\\CandC++\\C++\\wallpaper\\images\\海月.jpg",
-        "D:\\CandC++\\C++\\wallpaper\\images\\木叶.jpg",
-        "D:\\CandC++\\C++\\wallpaper\\images\\秋叶.jpg",
-        "D:\\CandC++\\C++\\wallpaper\\images\\秋天落叶.jpg",
-        "D:\\CandC++\\C++\\wallpaper\\images\\山丘.jpg",
+//    QStringList imagePathList;
 
-    };
-
-    // 遍历图片路径列表获取图片名和图片路径，并添加到 QList中
-    foreach (const QString &imagePath, imagePathList) {
-        QFileInfo fileInfo(imagePath);
+    QString folderPath = "D:\\CandC++\\C++\\wallpaper\\images";
+    // 读取文件夹中的文件
+    QDir directory(folderPath);
+    QStringList filters;
+    filters << "*.png" << "*.jpg" << "*.jpeg"; // 图片文件的扩展名
+    directory.setNameFilters(filters);
+    QFileInfoList fileList = directory.entryInfoList();
+    foreach (QFileInfo fileInfo, fileList) {
+        // 使用QImageReader加载图片
+//        imagePathList.append(fileInfo.filePath());
         QString imageName = fileInfo.fileName();
         ImageDataInfo info;
-        info.setPath(imagePath);
+        info.setPath(fileInfo.filePath());
+        qDebug() << "文件路径" << fileInfo.filePath();
         info.setPhotoName(imageName);
         mImagesList.push_back(info);
+
     }
+
+    // 遍历图片路径列表获取图片名和图片路径，并添加到 QList中
+//    foreach (const QString &imagePath, imagePathList) {
+//        QFileInfo fileInfo(imagePath);
+//        QString imageName = fileInfo.fileName();
+//        ImageDataInfo info;
+//        info.setPath(imagePath);
+//        info.setPhotoName(imageName);
+//        mImagesList.push_back(info);
+//    }
 
     // 获取壁纸
     // 执行查询语句，获取图片数据
