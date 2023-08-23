@@ -1,12 +1,12 @@
-﻿
-#ifndef IMAGEINFOITEM_H
-#define IMAGEINFOITEM_H
-/*
+﻿/*
  * author       :  YangLi
  * date         :  2023-07-18
  * description  :  ImageInfoItem是对QListWidget中的Item进行封装
  *                 该Item中显示图片，并设置了图片的鼠标事件：触碰、左击、右击
  */
+#ifndef IMAGEINFOITEM_H
+#define IMAGEINFOITEM_H
+
 #include <QWidget>
 #include <QMouseEvent>
 #include <QLabel>

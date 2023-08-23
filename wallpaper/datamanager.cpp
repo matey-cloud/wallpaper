@@ -4,74 +4,51 @@
  * description  :
  */
 #include "datamanager.h"
+#include <QDebug>
+
+const static QString homePath = "D:\\CandC++\\C++\\wallpaper\\images";
+const static QString colloetPath = "D:\\CandC++\\C++\\wallpaper\\collect";
+
 
 DataManager::DataManager()
     : mCurPage(1),
-      mTotalPage(0),
-      mImagesList() //定义并初始化图片列表
+      mTotalPage(0)
 {
-    getImages(); // 获取图片和页数
+
 }
 
-void DataManager::getImages()
+void DataManager::getImages(int num)
 {
-//    QStringList imagePathList;
-
-    QString folderPath = "D:\\CandC++\\C++\\wallpaper\\images";
+    clear();
+    QString folderPath;
+    if(num == 1){
+         folderPath = homePath;
+    }
+    else if(num == 2){
+        folderPath = colloetPath;
+    }
     // 读取文件夹中的文件
     QDir directory(folderPath);
     QStringList filters;
     filters << "*.png" << "*.jpg" << "*.jpeg"; // 图片文件的扩展名
     directory.setNameFilters(filters);
-    QFileInfoList fileList = directory.entryInfoList();
-    foreach (QFileInfo fileInfo, fileList) {
-        // 使用QImageReader加载图片
-//        imagePathList.append(fileInfo.filePath());
-        QString imageName = fileInfo.fileName();
-        ImageDataInfo info;
-        info.setPath(fileInfo.filePath());
-        qDebug() << "文件路径" << fileInfo.filePath();
-        info.setPhotoName(imageName);
-        mImagesList.push_back(info);
+    mFileList = directory.entryInfoList(); // 存储从文件夹中读取出的所有文件信息
 
-    }
-
-    // 遍历图片路径列表获取图片名和图片路径，并添加到 QList中
-//    foreach (const QString &imagePath, imagePathList) {
-//        QFileInfo fileInfo(imagePath);
-//        QString imageName = fileInfo.fileName();
-//        ImageDataInfo info;
-//        info.setPath(imagePath);
-//        info.setPhotoName(imageName);
-//        mImagesList.push_back(info);
-//    }
-
-    // 获取壁纸
-    // 执行查询语句，获取图片数据
-//    QSqlQuery query;
-//    query.prepare("SELECT data FROM images WHERE name = :name");
-//    query.bindValue(":name", "myimage.jpg");
-//    query.exec();
-//    if (query.next()) {
-//        ImageDataInfo info;
-//        info.mImageData = query.value(0).toByteArray();
-//        info.mPhotoName = query.value(1).toQString();
-
-//        // 加载图片数据并显示在 QLabel 上
-//        QPixmap pixmap;
-//        pixmap.loadFromData(imageData);
-//        ui->label->setPixmap(pixmap);
-
-//        // 将从数据库中读取的图片信息封装到ImageDataInfo插入到smImageList
-//        smImagesList.push_back(info);
-//    }
-
+    // 一共的图片数量
+    mTotalImage = mFileList.count();
+    qDebug() << "num " <<  num << "mTotalImage" << mTotalImage;
     // 计算页数
-    if((mImagesList.count() / 6) == 0){
-        mTotalPage = mImagesList.count() / 6;
+    if((mTotalImage / 6) == 0){
+        mTotalPage = mTotalImage / 6;
     } else {
-        mTotalPage = (mImagesList.count() / 6) + 1;
+        mTotalPage = (mTotalImage / 6) + 1;
     }
+
+    // 如果不足6张图片，即一页
+    if(mTotalImage == 0){
+        mTotalPage += 1;
+    }
+
 }
 
 QList<ImageDataInfo> DataManager::getImagesOfPage(int page)
@@ -83,13 +60,17 @@ QList<ImageDataInfo> DataManager::getImagesOfPage(int page)
     int startIndex = endIndex - 5;
 
     // 如果最后一页少于6个，QList将越界，所以需要把结束索引修改为容器的大小
-    if (endIndex > mImagesList.size()){
-        endIndex = mImagesList.size();
+    if (endIndex > mTotalImage){
+        endIndex = mTotalImage;
     }
+    // 需要哪一页图片就加载哪一页的图片
     for(int i = startIndex; i <= endIndex; ++i){
-        if(mImagesList.size()){
-            imageItemList.push_back(mImagesList[i-1]); //
-        }
+        ImageDataInfo info;
+//        QString imageName = mFileList[i - 1].fileName();
+        QString imageName = mFileList[i - 1].baseName();// 文件名没有后缀
+        info.setPath(mFileList[i - 1].filePath());
+        info.setPhotoName(imageName);
+        imageItemList.push_back(info);
     }
     return imageItemList;
 }
@@ -109,10 +90,13 @@ int DataManager::totalPage() const
     return mTotalPage;
 }
 
-QList<ImageDataInfo> DataManager::imagesList() const
+void DataManager::clear()
 {
-    return mImagesList;
+    mTotalPage = 0;
+    mTotalImage = 0;
+    mFileList.clear();
 }
+
 
 
 

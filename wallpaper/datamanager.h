@@ -18,22 +18,19 @@ class DataManager
 public:
     DataManager();
 
-
-    void getImages(); //从数据库中读出来的所有壁纸
+    void getImages(int num); //从文件夹中读出来的所有壁纸
     QList<ImageDataInfo> getImagesOfPage(int page);//从mImageList中读对应页的壁纸
 
-    int curPage() const;
-
-    int totalPage() const;
-
-    QList<ImageDataInfo> imagesList() const;
-
     void setCurPage(int newCurPage);
+    int curPage() const;
+    int totalPage() const;
+    void clear(); // 清空mFileList的数据
 
 private:
-    int mCurPage;
-    int mTotalPage;
-    QList<ImageDataInfo> mImagesList; // 存储从数据库中读出来的所有壁纸
+    int mCurPage; // 当前显示页
+    int mTotalPage;// 一共多少页图片
+    int mTotalImage; // 一共多少张图片
+    QFileInfoList mFileList; // 存储从文件夹中读取出的所有文件信息， QList<QFileInfo>
 };
 
 #endif // DATAMANAGER_H

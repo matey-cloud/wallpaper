@@ -13,7 +13,6 @@ ImageInfoItem::ImageInfoItem(QWidget *parent)
     , mImageInfo(nullptr)
 {
     ui->setupUi(this);
-
 }
 
 ImageInfoItem::~ImageInfoItem()
@@ -65,11 +64,14 @@ void ImageInfoItem::addImage()
     // 添加图片信息
     mImageInfo = new QLabel(ui->image); // 在图片上创建嵌套的文本标签
     // 设置字体和大小
-    QFont font("微软雅黑 ", 15); // 创建字体对象，Arial 字体，大小为 12
+    QFont font("微软雅黑 ", 15); // 创建字体对象字体，大小
     mImageInfo->setFont(font);
-    mImageInfo->setStyleSheet("color: gray;");
+    mImageInfo->setStyleSheet("color: white;"
+                              "background-color: rgba(53, 54, 55, 40%)");// 设置背景为深色且透明度
     mImageInfo->setText(mImageName); // 设置嵌套文本
-    mImageInfo->setGeometry(0, 160, 250, 30); // 设置嵌套标签的位置和大小
+    mImageInfo->setGeometry(20, 150, 0, 0); // 设置嵌套标签的位置和大小
+
+    mImageInfo->adjustSize();
     mImageInfo->setAlignment(Qt::AlignLeft); // 设置对齐方式
     mImageInfo->setVisible(false); // 当鼠标触碰才会看见
 
@@ -113,9 +115,8 @@ void ImageInfoItem::setWallPaper()
 //重写鼠标按下事件
 void ImageInfoItem::mousePressEvent(QMouseEvent *event)
 {
-    if(event->buttons() == Qt::LeftButton){
-        ui->image->setStyleSheet("border:2px solid yellow;"
-                                 " border-radius:25px;");
+    if(event->buttons() == Qt::MouseEventCreatedDoubleClick){
+        setWallPaper();
     }
 }
 
