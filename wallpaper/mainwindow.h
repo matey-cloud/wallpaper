@@ -12,7 +12,6 @@
 #include <QScrollBar>
 #include <QList>
 #include <QFileInfo> //
-#include <QIcon>
 #include <QHBoxLayout>
 #include <QPushButton>
 #include <QtGlobal>//需要用到qMax和qMin
@@ -22,10 +21,15 @@
 #include "imagedatainfo.h"
 #include "datamanager.h"
 
-
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
+
+// 描述主菜单的状态
+enum class MainMenu{
+    HomePage,
+    CollectPage
+};
 
 class MainWindow : public QMainWindow
 {
@@ -37,9 +41,30 @@ public:
 
     static const int smVisibleButtonCount = 7; // 设置分页栏显示的按钮个数
 
+    /*
+     * 初始化省略号按钮
+     */
+    void initEllipsisButton();
+
+    /*
+     * 初始化传入的listWidget
+     */
     void initListWigdet(QListWidget *listWidget);
-    void addImageToListWidget(int num, QListWidget *listWidget, QList<QPushButton *> &buttonList);
-    void updateListWidget(int num, int page, QListWidget *listWidget);
+
+    /*
+     * 根据传入的参数来判断需要调入哪一个页面的数据，返回一个int类型作为DataManagers的索引
+     */
+    int getCurMenuNum(MainMenu mainMenu);
+
+    /*
+     * 对菜单初始化按钮列表，视图item
+     */
+    void addImageToListWidget(MainMenu mainMenu, QListWidget *listWidget, QList<QPushButton *> &buttonList);
+
+    /*
+     * 更新对应菜单下的page页的图片
+     */
+    void updateListWidget(MainMenu mainMenu, int page, QListWidget *listWidget);
 
 protected:
     virtual void mousePressEvent(QMouseEvent *event);
@@ -48,18 +73,11 @@ protected:
 private:
     /*
      * 去除layout中的按钮列表
-     * 执行流程：
-     *   先判断mLayout中是否有buttonList的元素，有就去除，然后对该元素设置不可见
-     *   接着判断省略号按钮
      */
     void clearPaingLayout();
 
     /*
      * 显示当前分页控件的布局，由clickedId控制， buttonList是所需要的按钮列表
-     * 执行流程：
-     *    先调用clearPaingLayout，清除layout中的按钮列表
-     *    再调用curPaging，获取当前clickedId按钮布局需要显示的按钮，保存在mUseButtonList中
-     *    最后添加到mLayout中
      */
     void changePagingButton(const int clickedId, QList<QPushButton *> &buttonList);
 
@@ -72,16 +90,25 @@ private:
     void curPaging(const int clickedId, QList<QPushButton *> &buttonList);
 
     /*
-     * 执行流程：
-     *   获取对应按钮的文本，即编号，转为int类型
-     *   然后更新当前页，再用updateListWidget更新内容显示区
-     *   最后更改分页工具栏的样式
+     * 函数功能：
+     *   点击分页按钮后，视图显示对应按钮的图片，并更新分页控件的格式
      */
     void clickPagingButton(int num, QListWidget *listWidget, QList<QPushButton *> &buttonList); //当点击一个按钮后，需要进行的操作
 
 private slots:
-    void clickPaging(); // 点击分页按钮后，根据mFlag的值来判断传入值
+    /*
+     * 分页按钮点击后执行的槽函数
+     */
+    void clickPaging();
+
+    /*
+     * 首页按钮点击后执行的槽函数
+     */
     void on_homeButton_clicked();
+
+    /*
+     * 收藏页按钮点击后执行的槽函数
+     */
     void on_collectButton_clicked();
 
 private:
@@ -99,8 +126,7 @@ private:
     QPushButton *mEllipsisButtonRight;
 
     QHBoxLayout* mLayout; //水平显示 分页按钮
-    int mFlag; // 标记作用， 1表示显示首页， 2表示显示收藏页，默认为1
-
+    MainMenu mMainMenu; // 枚举值，起标记作用
 };
 
 #endif // MAINWINDOW_H

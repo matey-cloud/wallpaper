@@ -1,13 +1,10 @@
 <RCC>
-    <qresource prefix="/images">
-        <file>title.ico</file>
+    <qresource prefix="/icons">
         <file>close.ico</file>
         <file>min.ico</file>
         <file>set.ico</file>
+        <file>title.ico</file>
         <file>title.png</file>
-        <file>Itachi.jpg</file>
-        <file>Naruto.jpg</file>
-        <file>Obitu.jpg</file>
     </qresource>
     <qresource prefix="/qss">
         <file>scrollbar.qss</file>
