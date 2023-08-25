@@ -36,10 +36,13 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
+    const static int smRowItemNum = 3;
+    const static int smColumnItemNum = 3;
+    const static int smItemNum = smRowItemNum * smColumnItemNum;
+    const static int smVisibleButtonCount = 7; // 设置分页栏显示的按钮个数
+
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-
-    static const int smVisibleButtonCount = 7; // 设置分页栏显示的按钮个数
 
     /*
      * 初始化省略号按钮

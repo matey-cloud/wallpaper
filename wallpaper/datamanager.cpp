@@ -38,17 +38,16 @@ void DataManager::getImages(int num)
     mTotalImage = mFileList.count();
     qDebug() << "num " <<  num << "mTotalImage" << mTotalImage;
     // 计算页数
-    if((mTotalImage / 6) == 0){
-        mTotalPage = mTotalImage / 6;
+    if((mTotalImage / mPageImageNum) == 0){
+        mTotalPage = mTotalImage / mPageImageNum;
     } else {
-        mTotalPage = (mTotalImage / 6) + 1;
+        mTotalPage = (mTotalImage / mPageImageNum) + 1;
     }
 
-    // 如果不足6张图片，即一页
+    // 如果不足mPageImageNum张图片，即一页
     if(mTotalImage == 0){
         mTotalPage += 1;
     }
-
 }
 
 QList<ImageDataInfo> DataManager::getImagesOfPage(int page)
@@ -56,10 +55,10 @@ QList<ImageDataInfo> DataManager::getImagesOfPage(int page)
     QList<ImageDataInfo> imageItemList;
 
     // 要获取的那一页壁纸的索引
-    int endIndex = page * 6;
-    int startIndex = endIndex - 5;
+    int endIndex = page * mPageImageNum;
+    int startIndex = endIndex - (mPageImageNum-1) ;
 
-    // 如果最后一页少于6个，QList将越界，所以需要把结束索引修改为容器的大小
+    // 如果最后一页少于mPageImageNum个，QList将越界，所以需要把结束索引修改为容器的大小
     if (endIndex > mTotalImage){
         endIndex = mTotalImage;
     }
@@ -96,6 +95,17 @@ void DataManager::clear()
     mTotalImage = 0;
     mFileList.clear();
 }
+
+void DataManager::setPageImageNum(int newPageImageNum)
+{
+    mPageImageNum = newPageImageNum;
+}
+
+QFileInfoList DataManager::fileList() const
+{
+    return mFileList;
+}
+
 
 
 

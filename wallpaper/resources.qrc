@@ -4,7 +4,8 @@
         <file>min.ico</file>
         <file>set.ico</file>
         <file>title.ico</file>
-        <file>title.png</file>
+        <file>application.ico</file>
+        <file>logo.ico</file>
     </qresource>
     <qresource prefix="/qss">
         <file>scrollbar.qss</file>

@@ -2,7 +2,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -17,7 +16,7 @@ MainWindow::MainWindow(QWidget *parent)
     //如果是规则的矩形窗体这个可以不用
     // setAttribute(Qt::WA_TranslucentBackground,true);
     setWindowFlags(Qt::FramelessWindowHint | Qt::WindowSystemMenuHint | Qt::WindowMinimizeButtonHint);
-    setWindowIcon(QIcon(":/icons/title.png"));//可执行程序图标
+    setWindowIcon(QIcon(":/icons/application.ico"));//可执行程序图标
     setWindowTitle("小亦壁纸");
 
     mLayout = new QHBoxLayout(ui->tool);
@@ -43,8 +42,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     // 显示首页
     ui->stackedWidget->setCurrentIndex(0);
-    ui->homeButton->setCheckable(false);
-    ui->collectButton->setCheckable(true);
+    ui->homeButton->setEnabled(false);
+    ui->collectButton->setEnabled(true);
 }
 
 MainWindow::~MainWindow()
@@ -108,8 +107,8 @@ void MainWindow::initEllipsisButton()
     // 不可点击
     mEllipsisButtonLeft->setEnabled(false);
     mEllipsisButtonRight->setEnabled(false);
-    mEllipsisButtonLeft->setFixedSize(40, 40); // 设置按钮大小
-    mEllipsisButtonRight->setFixedSize(40, 40); // 设置按钮大小
+    mEllipsisButtonLeft->setFixedSize(35, 35); // 设置按钮大小
+    mEllipsisButtonRight->setFixedSize(35, 35); // 设置按钮大小
 }
 
 /*
@@ -117,8 +116,8 @@ void MainWindow::initEllipsisButton()
  */
 void MainWindow::initListWigdet(QListWidget *listWidget){
     // 获取容器QlistWidget的长度和宽度
-    int itemWidth = (listWidget->width()-20) / 3;
-    int itemHeight = (listWidget->height()) / 2;
+    int itemWidth = (listWidget->width()-20) / smRowItemNum;
+    int itemHeight = (listWidget->height()) / smRowItemNum;
 
     //初始化QListWidget
     listWidget->setIconSize(QSize(itemWidth,itemHeight)); // 每个Item的大小
@@ -167,13 +166,13 @@ int MainWindow::getCurMenuNum(MainMenu mainMenu){
 void MainWindow::addImageToListWidget(MainMenu mainMenu, QListWidget* listWidget, QList<QPushButton *> &buttonList)
 {
     DataManager* manager = new DataManager();
+    manager->setPageImageNum(smItemNum);
     mDataManagers.push_back(manager);
 
     // 获取容器QlistWidget的长度和宽度
-    int itemWidth = (listWidget->width()-20) / 3;
-    int itemHeight = (listWidget->height()) / 2;
-
+    QSize itemSize = listWidget->iconSize();
     int num = getCurMenuNum(mainMenu);
+
     // 读取对应num的图片文件夹, 并计算有多少页
     mDataManagers[num-1]->getImages(num);
     // 获取有多少页
@@ -182,34 +181,30 @@ void MainWindow::addImageToListWidget(MainMenu mainMenu, QListWidget* listWidget
     for(int n = 1; n <= pages; ++n){
         // 每页创建一个按钮
         QPushButton* button = new QPushButton(QString::number(n));// 按钮以页数命名
-        qDebug() << button->text();
-        button->setFixedSize(40, 40); // 设置按钮大小
+        button->setFixedSize(35, 35); // 设置按钮大小
         // 设置样式表
         button->setStyleSheet("QPushButton:pressed {"
                               "    background-color: darkblue;"
                               "    color: white;"
                               "}");
-
         //绑定分页按钮点击事件
         QObject::connect(button, &QPushButton::clicked, this, &MainWindow::clickPaging);
-
         button->setVisible(false);
         buttonList.append(button); // buttonList.push_back(button)，将按钮添加到按钮列表末尾
 
         // 创建单元项
         // 这里创建的Item使用的背景图是样式表中的默认背景图
-        for (int i = 0; i < 6; ++i)
+        for (int i = 0; i < smItemNum; ++i)
         {
             QListWidgetItem *item = new QListWidgetItem(listWidget);
             ImageInfoItem *widget = new ImageInfoItem;
-            item->setSizeHint(QSize(itemWidth, itemHeight));
+            item->setSizeHint(itemSize);
             listWidget->addItem(item);
             //最重要的是这句将Item设置为一个Widget，而这个Widget就是自定义的ui
             //将ImageInfoItem部件与相应的QListWidgetItem关联起来
             listWidget->setItemWidget(item, widget);
         }
     }
-
 }
 
 /*
@@ -224,7 +219,7 @@ void MainWindow::updateListWidget(MainMenu mainMenu, int page, QListWidget* list
     //获取第page页面的数据当在imageInfoList中
     QList<ImageDataInfo> imageInfoList = mDataManagers[num-1]->getImagesOfPage(page);
     //先初始化listWidget列表的每一项为空数据
-    for (int i = 0; i < 6; ++i)
+    for (int i = 0; i < smItemNum; ++i)
     {
         QListWidgetItem *item = listWidget->item(i);
         QWidget *widget = listWidget->itemWidget(item);
@@ -245,6 +240,14 @@ void MainWindow::updateListWidget(MainMenu mainMenu, int page, QListWidget* list
             imageInfoItem->addImage(imageInfoList[i]);
             // 设置 ImageInfoItem 作为 QListWidgetItem 的自定义小部件
             listWidget->setItemWidget(item, imageInfoItem);
+        }
+    }
+
+    // 对最后一页的处理
+    if(imageInfoList.size() != smItemNum){
+        for(int i = imageInfoList.size(); i < smItemNum; ++i){
+            QListWidgetItem *item = listWidget->item(i);
+            listWidget->removeItemWidget(item);
         }
     }
 }
@@ -292,7 +295,6 @@ void MainWindow::clearPaingLayout()
 void MainWindow::changePagingButton(const int clickedId, QList<QPushButton *> &buttonList)
 {
     clearPaingLayout(); // 清空当前布局mLayout中的Button
-
 
     curPaging(clickedId, buttonList);// 获取当前布局需要的按钮
     int count = mUseButtonList.count();
@@ -371,8 +373,8 @@ void MainWindow::curPaging(const int clickedId, QList<QPushButton *> &buttonList
  *   num -
  * 执行流程：
  *   获取对应按钮的文本，即编号，转为int类型
- *   然后更新当前页，再用updateListWidget更新内容显示区
- *   最后更改分页工具栏的样式
+ *   然后更改分页工具栏的样式
+ *   最后更新当前页，再用updateListWidget更新内容显示区
  */
 void MainWindow::clickPagingButton(int num, QListWidget *listWidget, QList<QPushButton *> &buttonList)
 {
@@ -382,10 +384,11 @@ void MainWindow::clickPagingButton(int num, QListWidget *listWidget, QList<QPush
         QString buttonText = button->text();
         int clickedId = buttonText.toInt(); // 获取点击的第几页
         mDataManagers[num-1]->setCurPage(clickedId);
-        updateListWidget(mMainMenu, mDataManagers[num-1]->curPage(),listWidget);
 
         // 更改分页工具栏的样式
         changePagingButton(clickedId, buttonList);
+        updateListWidget(mMainMenu, mDataManagers[num-1]->curPage(),listWidget);
+
     }
 }
 /*
@@ -414,8 +417,8 @@ void MainWindow::on_homeButton_clicked()
     changePagingButton(1, mHButtonList);
     ui->stackedWidget->setCurrentIndex(0);
 
-    ui->homeButton->setCheckable(false);
-    ui->collectButton->setCheckable(true);
+    ui->homeButton->setEnabled(false);
+    ui->collectButton->setEnabled(true);
 }
 
 /*
@@ -431,8 +434,8 @@ void MainWindow::on_collectButton_clicked()
     changePagingButton(1, mCButtonList);
     ui->stackedWidget->setCurrentIndex(1);
     // 设置当前按钮不可点击
-    ui->collectButton->setCheckable(false);
-    ui->homeButton->setCheckable(true);
+    ui->collectButton->setEnabled(false);
+    ui->homeButton->setEnabled(true);
 
 
 }

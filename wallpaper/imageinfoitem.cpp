@@ -26,18 +26,6 @@ void ImageInfoItem::addImage(ImageDataInfo &info)
     //    QString curPhoto = "图片名称 " + info.getPhotoName();
     mImageName = info.getPhotoName();
     mPath = info.getPath();
-    ui->frame->setFrameStyle(QFrame::Box);
-//    ui->frame->setStyleSheet("QFrame { border: 2px solid green; }");
-    // 加载图片
-//    QPixmap image(info.getPath());
-//    // 调整图片大小适应 QLabel 大小
-//    QPixmap scaledImage = mImage.scaled(ui->photo->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
-//    // 将图片设置为 QLabel 的内容
-//    ui->photo->setPixmap(scaledImage);
-//    // 根据需要设置 QLabel 的对齐方式
-//    ui->photo->setAlignment(Qt::AlignCenter);
-//    // 显示 QFrame
-//    ui->frame->show();
     addImage();
 }
 
@@ -46,11 +34,11 @@ void ImageInfoItem::addImage()
     // 加载图片
     QPixmap image(mPath);
     if( image.isNull()){
-
-        // 添加一个加载失败的图片
+        // A null pixmap has zero width, zero height and no contents. You cannot draw in a null pixmap.
     }
-    // 调整图片大小适应 QLabel 大小
-    QPixmap scaledImage = image.scaled(ui->image->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    // 需要调整图片大小适应 QLabel 大小
+    // 第二个参数为填满， 为默认参数
+    QPixmap scaledImage = image.scaled(this->size(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
     mImagePixmap = scaledImage;
 
     // 清空
@@ -61,6 +49,7 @@ void ImageInfoItem::addImage()
     // 根据需要设置 QLabel 的对齐方式
     ui->image->setAlignment(Qt::AlignCenter);
 
+
     // 添加图片信息
     mImageInfo = new QLabel(ui->image); // 在图片上创建嵌套的文本标签
     // 设置字体和大小
@@ -69,14 +58,14 @@ void ImageInfoItem::addImage()
     mImageInfo->setStyleSheet("color: white;"
                               "background-color: rgba(53, 54, 55, 40%)");// 设置背景为深色且透明度
     mImageInfo->setText(mImageName); // 设置嵌套文本
-    mImageInfo->setGeometry(20, 150, 0, 0); // 设置嵌套标签的位置和大小
+    mImageInfo->setGeometry(20, 130, 0, 0); // 设置嵌套标签的位置和大小
 
     mImageInfo->adjustSize();
     mImageInfo->setAlignment(Qt::AlignLeft); // 设置对齐方式
     mImageInfo->setVisible(false); // 当鼠标触碰才会看见
 
     // 显示 QFrame
-    ui->frame->show();
+    ui->image->show();
 }
 
 //右击图片
@@ -98,7 +87,6 @@ void ImageInfoItem::contextMenuEvent(QContextMenuEvent *event) {
 void ImageInfoItem::setWallPaper()
 {
     // 壁纸注册表
-
     QSettings wallpaperSettings("HKEY_CURRENT_USER\\Control Panel\\Desktop", QSettings::NativeFormat);
 
     wallpaperSettings.setValue("Wallpaper", mPath);
@@ -132,9 +120,6 @@ void ImageInfoItem::enterEvent(QEnterEvent *event)
 {
     setCursor(Qt::PointingHandCursor);
     mImageInfo->setVisible(true);
-    ui->image->setPixmap(mImagePixmap.scaled(mImagePixmap.size() * 1.2)); // 这里简单地将图片尺寸放大20%
-//    ui->image->setStyleSheet("border:2px solid red;"
-//                             " border-radius:25px;");
     QWidget::enterEvent(event);
 }
 
@@ -145,7 +130,6 @@ void ImageInfoItem::leaveEvent(QEvent *event){
     ui->image->setStyleSheet("");
     QWidget::leaveEvent(event);
 }
-
 
 
 

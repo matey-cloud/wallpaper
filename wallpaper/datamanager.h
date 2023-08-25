@@ -26,10 +26,15 @@ public:
     int totalPage() const;
     void clear(); // 清空mFileList的数据
 
+    void setPageImageNum(int newPageImageNum);
+
+    QFileInfoList fileList() const;
+
 private:
     int mCurPage; // 当前显示页
     int mTotalPage;// 一共多少页图片
     int mTotalImage; // 一共多少张图片
+    int mPageImageNum; // 一页有多少张图片
     QFileInfoList mFileList; // 存储从文件夹中读取出的所有文件信息， QList<QFileInfo>
 };
 
