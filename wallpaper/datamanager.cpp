@@ -65,7 +65,6 @@ QList<ImageDataInfo> DataManager::getImagesOfPage(int page)
     // 需要哪一页图片就加载哪一页的图片
     for(int i = startIndex; i <= endIndex; ++i){
         ImageDataInfo info;
-//        QString imageName = mFileList[i - 1].fileName();
         QString imageName = mFileList[i - 1].baseName();// 文件名没有后缀
         info.setPath(mFileList[i - 1].filePath());
         info.setPhotoName(imageName);

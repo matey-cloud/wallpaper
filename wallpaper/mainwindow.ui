@@ -187,7 +187,7 @@ QPushButton::disabled{
         <property name="geometry">
          <rect>
           <x>10</x>
-          <y>0</y>
+          <y>10</y>
           <width>51</width>
           <height>41</height>
          </rect>

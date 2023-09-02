@@ -35,10 +35,12 @@ MainWindow::MainWindow(QWidget *parent)
     // 收藏页
     addImageToListWidget(MainMenu::CollectPage, ui->listWidget_2, mCButtonList);
 
-    // 设置按钮在首页中默认的显示规则,从按钮1开始
-    changePagingButton(1, mHButtonList);
     // 给item绑定真实数据,默认更新第一页的数据
     updateListWidget(MainMenu::HomePage, 1, ui->listWidget);
+    // 设置按钮在首页中默认的显示规则,从按钮1开始
+    changePagingButton(1, mHButtonList);
+
+    updateListWidget(MainMenu::CollectPage, 1, ui->listWidget_2);
 
     // 显示首页
     ui->stackedWidget->setCurrentIndex(0);
@@ -234,6 +236,7 @@ void MainWindow::updateListWidget(MainMenu mainMenu, int page, QListWidget* list
     for (int i = 0; i < imageInfoList.size(); ++i)
     {
         QListWidgetItem *item = listWidget->item(i);
+        item->setHidden(false);
         QWidget * widget = listWidget->itemWidget(item);
         ImageInfoItem* imageInfoItem = dynamic_cast<ImageInfoItem*>(widget);
         if (imageInfoItem != nullptr) {
@@ -247,7 +250,8 @@ void MainWindow::updateListWidget(MainMenu mainMenu, int page, QListWidget* list
     if(imageInfoList.size() != smItemNum){
         for(int i = imageInfoList.size(); i < smItemNum; ++i){
             QListWidgetItem *item = listWidget->item(i);
-            listWidget->removeItemWidget(item);
+//            item->setHidden(true);
+
         }
     }
 }
@@ -320,11 +324,13 @@ void MainWindow::curPaging(const int clickedId, QList<QPushButton *> &buttonList
     int buttonCount = buttonList.count();
 
     // 如果可见按钮的数量比总页数还大，显示所有的按钮，不需要省略号按钮
+    // 执行后退出
     if(buttonCount <= visibleButtonCount){
         for(auto button : buttonList){
             button->setVisible(true);
             mUseButtonList.append(button);
         }
+        return;
     }
 
     if(clickedId <= visibleButtonCount / 2 + 1){ // 需要右省略号按钮（出现在点击按钮的右边）
@@ -379,15 +385,16 @@ void MainWindow::curPaging(const int clickedId, QList<QPushButton *> &buttonList
 void MainWindow::clickPagingButton(int num, QListWidget *listWidget, QList<QPushButton *> &buttonList)
 {
     QPushButton* button = qobject_cast<QPushButton*>(sender()); // 获取发出信号的按钮
+
     if(button){
         // 更新对应页数的壁纸
         QString buttonText = button->text();
         int clickedId = buttonText.toInt(); // 获取点击的第几页
         mDataManagers[num-1]->setCurPage(clickedId);
 
+        updateListWidget(mMainMenu, mDataManagers[num-1]->curPage(),listWidget);
         // 更改分页工具栏的样式
         changePagingButton(clickedId, buttonList);
-        updateListWidget(mMainMenu, mDataManagers[num-1]->curPage(),listWidget);
 
     }
 }
@@ -413,8 +420,9 @@ void MainWindow::clickPaging(){
 void MainWindow::on_homeButton_clicked()
 {
     mMainMenu = MainMenu::HomePage;
-    updateListWidget(mMainMenu, 1, ui->listWidget);
-    changePagingButton(1, mHButtonList);
+//    updateListWidget(mMainMenu, 1, ui->listWidget);
+//    changePagingButton(1, mHButtonList);
+    changePagingButton(mDataManagers[0]->curPage(), mHButtonList);
     ui->stackedWidget->setCurrentIndex(0);
 
     ui->homeButton->setEnabled(false);
@@ -423,20 +431,18 @@ void MainWindow::on_homeButton_clicked()
 
 /*
  * 点击收藏按钮后，先更改mMainMenu的值，标识收藏页
- * 然后更新收藏页页面的图片，显示第一页
+ * 然后更新收藏页页面的图片，显示第二页
  * 再更改分页控件的布局
  * 最后显示收藏页
  */
 void MainWindow::on_collectButton_clicked()
 {
     mMainMenu = MainMenu::CollectPage;
-    updateListWidget(mMainMenu, 1, ui->listWidget_2);
-    changePagingButton(1, mCButtonList);
+//    updateListWidget(mMainMenu, 1, ui->listWidget_2);
+    changePagingButton(mDataManagers[1]->curPage(), mCButtonList);
     ui->stackedWidget->setCurrentIndex(1);
     // 设置当前按钮不可点击
     ui->collectButton->setEnabled(false);
     ui->homeButton->setEnabled(true);
-
-
 }
 

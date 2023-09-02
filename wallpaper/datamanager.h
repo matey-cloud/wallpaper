@@ -13,6 +13,12 @@
 
 #include "imagedatainfo.h"
 
+//// 描述主菜单的状态
+//enum class MainMenu{
+//    HomePage,
+//    CollectPage
+//};
+
 class DataManager
 {
 public:
