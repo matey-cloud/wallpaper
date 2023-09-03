@@ -24,17 +24,20 @@ class DataManager
 public:
     DataManager();
 
-    void getImages(int num); //从文件夹中读出来的所有壁纸
-    QList<ImageDataInfo> getImagesOfPage(int page);//从mImageList中读对应页的壁纸
+    void getImages(int num); //从文件夹中读出来的所有图片
+    QList<ImageDataInfo> getImagesOfPage(int page);//从mImageList中读对应页的图片
 
-    void setCurPage(int newCurPage);
-    int curPage() const;
-    int totalPage() const;
-    void clear(); // 清空mFileList的数据
+    void getClassflyImages(const QString& str);
+    QList<ImageDataInfo> getClassflyImagesOfPage(int page);
 
-    void setPageImageNum(int newPageImageNum);
 
-    QFileInfoList fileList() const;
+    void setCurPage(int newCurPage) { mCurPage = newCurPage; } // 设置当前显示页
+    int curPage() const { return mCurPage; } // 获取当前显示页
+    int totalPage() const { return mTotalPage; } // 获取一共多少页
+    void setPageImageNum(int newPageImageNum){ mPageImageNum = newPageImageNum; }
+    QFileInfoList fileList() const{ return mFileList; }
+
+    int classflyTotalPage() const { return mClassflyTotalPage; }// 获取当前分类一共多少页
 
 private:
     int mCurPage; // 当前显示页
@@ -42,6 +45,11 @@ private:
     int mTotalImage; // 一共多少张图片
     int mPageImageNum; // 一页有多少张图片
     QFileInfoList mFileList; // 存储从文件夹中读取出的所有文件信息， QList<QFileInfo>
+
+    int mClassflyCurPage; // 当前分类显示页
+    int mClassflyTotalPage;// 当前分类一共多少页图片
+    int mClassflyTotalImage; // 当前分类一共多少张图片
+    QFileInfoList mFileClassflyList; // 分类按钮点击后，启用
 };
 
 #endif // DATAMANAGER_H

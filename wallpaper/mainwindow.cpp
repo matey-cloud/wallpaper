@@ -9,6 +9,7 @@ MainWindow::MainWindow(QWidget *parent)
     , mEllipsisButtonRight(nullptr)
     , mLayout(nullptr)
     , mMainMenu(MainMenu::HomePage) // 默认首页
+    , mImageSource(ImageSource::All) // 默认使用全部图片
 {
     ui->setupUi(this);
     //去掉软件标题栏，自己来实现  Qt::FramelessWindowHint
@@ -36,11 +37,11 @@ MainWindow::MainWindow(QWidget *parent)
     addImageToListWidget(MainMenu::CollectPage, ui->listWidget_2, mCButtonList);
 
     // 给item绑定真实数据,默认更新第一页的数据
-    updateListWidget(MainMenu::HomePage, 1, ui->listWidget);
+    updateListWidget(MainMenu::HomePage, 1, ui->listWidget, mDataManagers[0]->getImagesOfPage(1));
     // 设置按钮在首页中默认的显示规则,从按钮1开始
-    changePagingButton(1, mHButtonList);
+    changePagingButton(1, mHButtonList, mDataManagers[0]->totalPage());
 
-    updateListWidget(MainMenu::CollectPage, 1, ui->listWidget_2);
+    updateListWidget(MainMenu::CollectPage, 1, ui->listWidget_2, mDataManagers[1]->getImagesOfPage(1));
 
     // 显示首页
     ui->stackedWidget->setCurrentIndex(0);
@@ -215,11 +216,11 @@ void MainWindow::addImageToListWidget(MainMenu mainMenu, QListWidget* listWidget
  * 根据page获取当前菜单下page页的图片
  * 再将图片添加到每一个item中
  */
-void MainWindow::updateListWidget(MainMenu mainMenu, int page, QListWidget* listWidget){
-    int num = getCurMenuNum(mainMenu);
+void MainWindow::updateListWidget(MainMenu mainMenu, int page, QListWidget* listWidget, QList<ImageDataInfo> imageInfoList){
+//    int num = getCurMenuNum(mainMenu);
 
-    //获取第page页面的数据当在imageInfoList中
-    QList<ImageDataInfo> imageInfoList = mDataManagers[num-1]->getImagesOfPage(page);
+//    //获取第page页面的数据当在imageInfoList中
+//    QList<ImageDataInfo> imageInfoList = mDataManagers[num-1]->getImagesOfPage(page);
     //先初始化listWidget列表的每一项为空数据
     for (int i = 0; i < smItemNum; ++i)
     {
@@ -247,13 +248,12 @@ void MainWindow::updateListWidget(MainMenu mainMenu, int page, QListWidget* list
     }
 
     // 对最后一页的处理
-    if(imageInfoList.size() != smItemNum){
-        for(int i = imageInfoList.size(); i < smItemNum; ++i){
-            QListWidgetItem *item = listWidget->item(i);
+//    if(imageInfoList.size() != smItemNum){
+//        for(int i = imageInfoList.size(); i < smItemNum; ++i){
+//            QListWidgetItem *item = listWidget->item(i);
 //            item->setHidden(true);
-
-        }
-    }
+//        }
+//    }
 }
 
 /*
@@ -296,11 +296,11 @@ void MainWindow::clearPaingLayout()
  *   再调用curPaging，获取当前clickedId按钮布局需要显示的按钮，保存在mUseButtonList中
  *   最后添加到mLayout中
  */
-void MainWindow::changePagingButton(const int clickedId, QList<QPushButton *> &buttonList)
+void MainWindow::changePagingButton(const int clickedId, QList<QPushButton *> &buttonList, const int buttonCount)
 {
     clearPaingLayout(); // 清空当前布局mLayout中的Button
 
-    curPaging(clickedId, buttonList);// 获取当前布局需要的按钮
+    curPaging(clickedId, buttonList, buttonCount);// 获取当前布局需要的按钮
     int count = mUseButtonList.count();
         for(int i = 0; i < count ; ++i){
         mUseButtonList[i]->setVisible(true);
@@ -315,20 +315,18 @@ void MainWindow::changePagingButton(const int clickedId, QList<QPushButton *> &b
  *    然后统计参数buttonList的个数，表示有多少个按钮
  *    根据当前按钮个数和需要显示的按钮个数的大小， 判断是否需要省略号按钮
  */
-void MainWindow::curPaging(const int clickedId, QList<QPushButton *> &buttonList){
+void MainWindow::curPaging(const int clickedId, QList<QPushButton *> &buttonList, const int buttonCount){
 
     mUseButtonList.clear();
     // 按钮列表中设置显示smVisibleButtonCount个
     int visibleButtonCount = smVisibleButtonCount;
-    // 一共多少个按钮，就有多少页壁纸
-    int buttonCount = buttonList.count();
 
     // 如果可见按钮的数量比总页数还大，显示所有的按钮，不需要省略号按钮
     // 执行后退出
     if(buttonCount <= visibleButtonCount){
-        for(auto button : buttonList){
-            button->setVisible(true);
-            mUseButtonList.append(button);
+        for(int i = 0; i < buttonCount; ++i){
+            buttonList[i]->setVisible(true);
+            mUseButtonList.append(buttonList[i]);
         }
         return;
     }
@@ -391,10 +389,25 @@ void MainWindow::clickPagingButton(int num, QListWidget *listWidget, QList<QPush
         QString buttonText = button->text();
         int clickedId = buttonText.toInt(); // 获取点击的第几页
         mDataManagers[num-1]->setCurPage(clickedId);
+        int curPage = mDataManagers[num-1]->curPage();
 
-        updateListWidget(mMainMenu, mDataManagers[num-1]->curPage(),listWidget);
+
+        QList<ImageDataInfo> imageList;
+        int buttonCount = 0;
+        // 判断使用的图片是分类的图片还是全部图片
+        // 以及按钮的个数
+        if(mImageSource == ImageSource::All){
+            imageList = mDataManagers[num-1]->getImagesOfPage(curPage);
+            buttonCount = mDataManagers[num-1]->totalPage();
+        }
+        else{
+            imageList = mDataManagers[num-1]->getClassflyImagesOfPage(curPage);
+            buttonCount = mDataManagers[num-1]->classflyTotalPage();
+        }
+
+        updateListWidget(mMainMenu, curPage, listWidget, imageList);
         // 更改分页工具栏的样式
-        changePagingButton(clickedId, buttonList);
+        changePagingButton(clickedId, buttonList, buttonCount);
 
     }
 }
@@ -420,9 +433,10 @@ void MainWindow::clickPaging(){
 void MainWindow::on_homeButton_clicked()
 {
     mMainMenu = MainMenu::HomePage;
+    mImageSource = ImageSource::All;
 //    updateListWidget(mMainMenu, 1, ui->listWidget);
 //    changePagingButton(1, mHButtonList);
-    changePagingButton(mDataManagers[0]->curPage(), mHButtonList);
+    changePagingButton(mDataManagers[0]->curPage(), mHButtonList, mDataManagers[0]->totalPage());
     ui->stackedWidget->setCurrentIndex(0);
 
     ui->homeButton->setEnabled(false);
@@ -438,11 +452,71 @@ void MainWindow::on_homeButton_clicked()
 void MainWindow::on_collectButton_clicked()
 {
     mMainMenu = MainMenu::CollectPage;
+    mImageSource = ImageSource::All;
 //    updateListWidget(mMainMenu, 1, ui->listWidget_2);
-    changePagingButton(mDataManagers[1]->curPage(), mCButtonList);
+    changePagingButton(mDataManagers[1]->curPage(), mCButtonList, mDataManagers[1]->totalPage());
     ui->stackedWidget->setCurrentIndex(1);
     // 设置当前按钮不可点击
     ui->collectButton->setEnabled(false);
     ui->homeButton->setEnabled(true);
+}
+
+
+void MainWindow::on_all_clicked()
+{
+    mImageSource = ImageSource::All;
+    updateListWidget(MainMenu::HomePage, 1, ui->listWidget, mDataManagers[0]->getImagesOfPage(1));
+    changePagingButton(1, mHButtonList, mDataManagers[0]->totalPage());
+
+}
+
+
+void MainWindow::on_dongman_clicked()
+{
+    mImageSource = ImageSource::Classfly;
+    mDataManagers[0]->getClassflyImages("动漫");
+    changePagingButton(1, mHButtonList, mDataManagers[0]->classflyTotalPage());
+    updateListWidget(MainMenu::HomePage, 1, ui->listWidget, mDataManagers[0]->getClassflyImagesOfPage(1));
+
+}
+
+
+void MainWindow::on_dongwu_clicked()
+{
+    mImageSource = ImageSource::Classfly;
+    mDataManagers[0]->getClassflyImages("动物");
+    changePagingButton(1, mHButtonList, mDataManagers[0]->classflyTotalPage());
+    updateListWidget(MainMenu::HomePage, 1, ui->listWidget, mDataManagers[0]->getClassflyImagesOfPage(1));
+
+}
+
+
+void MainWindow::on_fengjing_clicked()
+{
+    mImageSource = ImageSource::Classfly;
+    mDataManagers[0]->getClassflyImages("风景");
+    changePagingButton(1, mHButtonList, mDataManagers[0]->classflyTotalPage());
+    updateListWidget(MainMenu::HomePage, 1, ui->listWidget, mDataManagers[0]->getClassflyImagesOfPage(1));
+
+}
+
+
+void MainWindow::on_jianyue_clicked()
+{
+    mImageSource = ImageSource::Classfly;
+    mDataManagers[0]->getClassflyImages("简约");
+    changePagingButton(1, mHButtonList, mDataManagers[0]->classflyTotalPage());
+    updateListWidget(MainMenu::HomePage, 1, ui->listWidget, mDataManagers[0]->getClassflyImagesOfPage(1));
+
+}
+
+
+void MainWindow::on_youxi_clicked()
+{
+    mImageSource = ImageSource::Classfly;
+    mDataManagers[0]->getClassflyImages("游戏");
+    changePagingButton(1, mHButtonList, mDataManagers[0]->classflyTotalPage());
+    updateListWidget(MainMenu::HomePage, 1, ui->listWidget, mDataManagers[0]->getClassflyImagesOfPage(1));
+
 }
 

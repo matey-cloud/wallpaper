@@ -31,6 +31,12 @@ enum class MainMenu{
     CollectPage
 };
 
+// 描述图片源是全部还是分类后
+enum class ImageSource{
+    All,
+    Classfly
+};
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -67,7 +73,7 @@ public:
     /*
      * 更新对应菜单下的page页的图片
      */
-    void updateListWidget(MainMenu mainMenu, int page, QListWidget *listWidget);
+    void updateListWidget(MainMenu mainMenu, int page, QListWidget *listWidget, QList<ImageDataInfo> imageInfoList);
 
 protected:
     virtual void mousePressEvent(QMouseEvent *event);
@@ -82,7 +88,7 @@ private:
     /*
      * 显示当前分页控件的布局，由clickedId控制， buttonList是所需要的按钮列表
      */
-    void changePagingButton(const int clickedId, QList<QPushButton *> &buttonList);
+    void changePagingButton(const int clickedId, QList<QPushButton *> &buttonList, const int buttonCount);
 
     /*
      * 执行流程：
@@ -90,7 +96,7 @@ private:
      *    然后统计参数buttonList的个数，表示有多少个按钮
      *    根据当前按钮个数和需要显示的按钮个数的大小， 判断是否需要省略号按钮
      */
-    void curPaging(const int clickedId, QList<QPushButton *> &buttonList);
+    void curPaging(const int clickedId, QList<QPushButton *> &buttonList, const int buttonCount);
 
     /*
      * 函数功能：
@@ -114,6 +120,18 @@ private slots:
      */
     void on_collectButton_clicked();
 
+    void on_all_clicked();
+
+    void on_dongman_clicked();
+
+    void on_dongwu_clicked();
+
+    void on_fengjing_clicked();
+
+    void on_jianyue_clicked();
+
+    void on_youxi_clicked();
+
 private:
     Ui::MainWindow *ui;
 
@@ -130,6 +148,7 @@ private:
 
     QHBoxLayout* mLayout; //水平显示 分页按钮
     MainMenu mMainMenu; // 枚举值，起标记作用
+    ImageSource mImageSource;
 };
 
 #endif // MAINWINDOW_H
