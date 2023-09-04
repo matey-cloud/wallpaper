@@ -90,8 +90,15 @@ void DataManager::getClassflyImages(const QString &str)
 {
     mFileClassflyList.clear();
     for(const auto& image : mFileList){
-        if(image.absolutePath().contains(str))
+        // 对当前文件的绝对路径处理
+        QString classflyName = image.absolutePath();
+        QStringList res = classflyName.split('/');
+        // res.back()就是该图片的分类名称，即这张图片在这个文件夹下
+        if(res.back().contains(str) || image.baseName().contains(str)){
+            qDebug() << res.back();
             mFileClassflyList.push_back(image);
+        }
+
     }
 
     // 一共的图片数量
@@ -104,7 +111,6 @@ void DataManager::getClassflyImages(const QString &str)
     } else{
         mClassflyTotalPage = (mClassflyTotalImage / mPageImageNum) + 1;
     }
-    qDebug()<<"107 一共多少页 " << mClassflyTotalPage;
 }
 
 QList<ImageDataInfo> DataManager::getClassflyImagesOfPage(int page)

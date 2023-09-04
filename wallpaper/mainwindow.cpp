@@ -211,9 +211,8 @@ void MainWindow::addImageToListWidget(MainMenu mainMenu, QListWidget* listWidget
 }
 
 /*
- * 先根据mainMenu获取num
- * num-1是当前菜单的资源mDataManagers的索引，
- * 根据page获取当前菜单下page页的图片
+ * imageInfoList是该页需要的图片
+ * listWidget是图片显示的视图
  * 再将图片添加到每一个item中
  */
 void MainWindow::updateListWidget(MainMenu mainMenu, int page, QListWidget* listWidget, QList<ImageDataInfo> imageInfoList){
@@ -517,6 +516,23 @@ void MainWindow::on_youxi_clicked()
     mDataManagers[0]->getClassflyImages("游戏");
     changePagingButton(1, mHButtonList, mDataManagers[0]->classflyTotalPage());
     updateListWidget(MainMenu::HomePage, 1, ui->listWidget, mDataManagers[0]->getClassflyImagesOfPage(1));
+
+}
+
+
+void MainWindow::on_searchButton_clicked()
+{
+    int num = getCurMenuNum(mMainMenu);
+    mImageSource = ImageSource::Classfly;
+    mDataManagers[num-1]->getClassflyImages(ui->searchText->text());
+    changePagingButton(1, mHButtonList, mDataManagers[num-1]->classflyTotalPage());
+    QListWidget* listWidget;
+    if(num == 1){
+        listWidget = ui->listWidget;
+    } else if(num == 2){
+        listWidget = ui->listWidget_2;
+    }
+    updateListWidget(MainMenu::HomePage, 1, listWidget, mDataManagers[num-1]->getClassflyImagesOfPage(1));
 
 }
 
