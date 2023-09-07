@@ -22,6 +22,9 @@
 class DataManager
 {
 public:
+    inline static const QString smHomePath = "D:\\CandC++\\C++\\wallpaper\\images";
+    inline static const QString smColloetPath = "D:\\CandC++\\C++\\wallpaper\\collect";
+
     DataManager();
 
     void getImages(int num); //从文件夹中读出来的所有图片
@@ -39,6 +42,8 @@ public:
 
     int classflyTotalPage() const { return mClassflyTotalPage; }// 获取当前分类一共多少页
 
+    // 计算图片数量和页数量
+    void CalculateImageAndPageCount();
 private:
     int mCurPage; // 当前显示页
     int mTotalPage;// 一共多少页图片

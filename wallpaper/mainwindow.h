@@ -104,6 +104,25 @@ private:
      */
     void clickPagingButton(int num, QListWidget *listWidget, QList<QPushButton *> &buttonList); //当点击一个按钮后，需要进行的操作
 
+    /*
+     * 判断分类按钮是否点击，如果点击了设置该按钮不可点击，其他按钮可被点击
+     * 并设置样式
+     */
+    void isClickClassflyButton(QPushButton *button);
+
+    /*
+     * 初始化首页中的分页按钮，由addImageToListWidget创建
+     * 在点击分类按钮后会使用
+     * 将第一个按钮设置为不可点击，其他按钮设置为可点击
+     */
+    void initHomeButtonList();
+
+    /*
+     * 将图片添加到收藏夹中或者从收藏夹中去除后
+     * 需要重新更新收藏夹的内容
+     */
+    void updateCollection();
+
 private slots:
     /*
      * 分页按钮点击后执行的槽函数
@@ -134,6 +153,9 @@ private slots:
 
     void on_searchButton_clicked();
 
+    void addCollection(ImageInfoItem *imageItem);
+
+    void removeCollection(ImageInfoItem *imageItem);
 private:
     Ui::MainWindow *ui;
 
@@ -150,7 +172,9 @@ private:
 
     QHBoxLayout* mLayout; //水平显示 分页按钮
     MainMenu mMainMenu; // 枚举值，起标记作用
-    ImageSource mImageSource;
+    ImageSource mImageSource; // 枚举值， 判断使用的图片来源是全部还是分类后的图片
+
+
 };
 
 #endif // MAINWINDOW_H

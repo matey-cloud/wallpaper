@@ -10,6 +10,9 @@
 ImageInfoItem::ImageInfoItem(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::ImageInfoItem)
+    , mMenu(this) // 创建菜单
+    , mAction1(nullptr)
+    , mAction2(nullptr)
     , mImageInfo(nullptr)
 {
     ui->setupUi(this);
@@ -18,6 +21,8 @@ ImageInfoItem::ImageInfoItem(QWidget *parent)
 ImageInfoItem::~ImageInfoItem()
 {
     delete mImageInfo;
+    delete mAction2;
+    delete mAction1;
     delete ui;
 }
 
@@ -68,19 +73,27 @@ void ImageInfoItem::addImage()
     ui->image->show();
 }
 
+void ImageInfoItem::RightClickMenu(int num){
+    mMenu.clear();
+    mAction1 = mMenu.addAction("设置为壁纸"); // 添加菜单项
+
+    if(num == 1) // 首页 需要添加收藏功能
+        mAction2 = mMenu.addAction("添加到收藏");
+    else if(num == 2) // 收藏页 需要移除收藏功能
+        mAction2 = mMenu.addAction("从收藏中移除");
+
+}
+
 //右击图片
 void ImageInfoItem::contextMenuEvent(QContextMenuEvent *event) {
-    QMenu menu(this); // 创建菜单
 
-    QAction *action1 = menu.addAction("设置为壁纸"); // 添加菜单项
-    QAction *action2 = menu.addAction("添加到我的");
+    QAction *selectedAction = mMenu.exec(event->globalPos()); // 在鼠标位置弹出菜单
 
-    QAction *selectedAction = menu.exec(event->globalPos()); // 在鼠标位置弹出菜单
-
-    if (selectedAction == action1) {
+    if (selectedAction == mAction1) {
         setWallPaper();
-    } else if (selectedAction == action2) {
+    } else if (selectedAction == mAction2) {
         // 处理 Action 2 的操作
+        emit clickCollectMenu(this);
     }
 }
 
@@ -130,6 +143,7 @@ void ImageInfoItem::leaveEvent(QEvent *event){
     ui->image->setStyleSheet("");
     QWidget::leaveEvent(event);
 }
+
 
 
 

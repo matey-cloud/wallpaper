@@ -1,6 +1,8 @@
 ﻿
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include <QFile>
+#include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -36,17 +38,20 @@ MainWindow::MainWindow(QWidget *parent)
     // 收藏页
     addImageToListWidget(MainMenu::CollectPage, ui->listWidget_2, mCButtonList);
 
-    // 给item绑定真实数据,默认更新第一页的数据
-    updateListWidget(MainMenu::HomePage, 1, ui->listWidget, mDataManagers[0]->getImagesOfPage(1));
-    // 设置按钮在首页中默认的显示规则,从按钮1开始
-    changePagingButton(1, mHButtonList, mDataManagers[0]->totalPage());
 
-    updateListWidget(MainMenu::CollectPage, 1, ui->listWidget_2, mDataManagers[1]->getImagesOfPage(1));
+    // 默认显示首页的内容
+    on_homeButton_clicked();
 
-    // 显示首页
-    ui->stackedWidget->setCurrentIndex(0);
-    ui->homeButton->setEnabled(false);
-    ui->collectButton->setEnabled(true);
+//    // 给item绑定真实数据,默认更新第一页的数据
+//    updateListWidget(MainMenu::HomePage, 1, ui->listWidget, mDataManagers[0]->getImagesOfPage(1));
+//    // 设置按钮在首页中默认的显示规则,从按钮1开始
+//    changePagingButton(1, mHButtonList, mDataManagers[0]->totalPage());
+
+//    updateListWidget(MainMenu::CollectPage, 1, ui->listWidget_2, mDataManagers[1]->getImagesOfPage(1));
+
+//    // 显示首页
+//    ui->stackedWidget->setCurrentIndex(0);
+
 }
 
 MainWindow::~MainWindow()
@@ -132,8 +137,8 @@ void MainWindow::initListWigdet(QListWidget *listWidget){
     listWidget->horizontalScrollBar()->setDisabled(true);
     listWidget->verticalScrollBar()->setDisabled(true);
     listWidget->setStyleSheet("QListWidget::Item:hover{background-color:rgba(47,46,46,0);border-radius:5px; }"
-                                  "QListWidget::item:selected{background-color:rgba(47,46,46,0);color:rgb(61,61,61);border:2px solid #FFC53D;border-radius:5px; }"
-                                  "QScrollBar:vertical{width:0px}");
+                              "QListWidget::item:selected{background-color:rgba(47,46,46,0);color:rgb(61,61,61);border:2px solid #FFC53D;border-radius:5px; }"
+                              "QScrollBar:vertical{width:0px}");
     listWidget->setFocusPolicy(Qt::NoFocus);//文字没虚线
     listWidget->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 
@@ -185,11 +190,14 @@ void MainWindow::addImageToListWidget(MainMenu mainMenu, QListWidget* listWidget
         // 每页创建一个按钮
         QPushButton* button = new QPushButton(QString::number(n));// 按钮以页数命名
         button->setFixedSize(35, 35); // 设置按钮大小
+
         // 设置样式表
-        button->setStyleSheet("QPushButton:pressed {"
-                              "    background-color: darkblue;"
-                              "    color: white;"
-                              "}");
+        QFile file(":/qss/button.qss");
+        file.open(QFile::ReadOnly);
+        QString styleSheet = tr(file.readAll());
+        button->setStyleSheet(styleSheet);
+        file.close();
+
         //绑定分页按钮点击事件
         QObject::connect(button, &QPushButton::clicked, this, &MainWindow::clickPaging);
         button->setVisible(false);
@@ -216,10 +224,10 @@ void MainWindow::addImageToListWidget(MainMenu mainMenu, QListWidget* listWidget
  * 再将图片添加到每一个item中
  */
 void MainWindow::updateListWidget(MainMenu mainMenu, int page, QListWidget* listWidget, QList<ImageDataInfo> imageInfoList){
-//    int num = getCurMenuNum(mainMenu);
+    int num = getCurMenuNum(mainMenu); // 创建每个Item时，右击生成的菜单需要
 
-//    //获取第page页面的数据当在imageInfoList中
-//    QList<ImageDataInfo> imageInfoList = mDataManagers[num-1]->getImagesOfPage(page);
+    //    //获取第page页面的数据当在imageInfoList中
+    //    QList<ImageDataInfo> imageInfoList = mDataManagers[num-1]->getImagesOfPage(page);
     //先初始化listWidget列表的每一项为空数据
     for (int i = 0; i < smItemNum; ++i)
     {
@@ -240,19 +248,25 @@ void MainWindow::updateListWidget(MainMenu mainMenu, int page, QListWidget* list
         QWidget * widget = listWidget->itemWidget(item);
         ImageInfoItem* imageInfoItem = dynamic_cast<ImageInfoItem*>(widget);
         if (imageInfoItem != nullptr) {
+            imageInfoItem->RightClickMenu(num);
             imageInfoItem->addImage(imageInfoList[i]);
             // 设置 ImageInfoItem 作为 QListWidgetItem 的自定义小部件
             listWidget->setItemWidget(item, imageInfoItem);
+
+            if(num == 1)
+                QObject::connect(imageInfoItem, SIGNAL(clickCollectMenu(ImageInfoItem*)), this, SLOT(addCollection(ImageInfoItem*)));
+            else if(num == 2)
+                QObject::connect(imageInfoItem, SIGNAL(clickCollectMenu(ImageInfoItem*)), this, SLOT(removeCollection(ImageInfoItem*)));
         }
     }
 
     // 对最后一页的处理
-//    if(imageInfoList.size() != smItemNum){
-//        for(int i = imageInfoList.size(); i < smItemNum; ++i){
-//            QListWidgetItem *item = listWidget->item(i);
-//            item->setHidden(true);
-//        }
-//    }
+    //    if(imageInfoList.size() != smItemNum){
+    //        for(int i = imageInfoList.size(); i < smItemNum; ++i){
+    //            QListWidgetItem *item = listWidget->item(i);
+    //            item->setHidden(true);
+    //        }
+    //    }
 }
 
 /*
@@ -301,7 +315,7 @@ void MainWindow::changePagingButton(const int clickedId, QList<QPushButton *> &b
 
     curPaging(clickedId, buttonList, buttonCount);// 获取当前布局需要的按钮
     int count = mUseButtonList.count();
-        for(int i = 0; i < count ; ++i){
+    for(int i = 0; i < count ; ++i){
         mUseButtonList[i]->setVisible(true);
         mLayout->addWidget(mUseButtonList[i]);
     }
@@ -390,7 +404,6 @@ void MainWindow::clickPagingButton(int num, QListWidget *listWidget, QList<QPush
         mDataManagers[num-1]->setCurPage(clickedId);
         int curPage = mDataManagers[num-1]->curPage();
 
-
         QList<ImageDataInfo> imageList;
         int buttonCount = 0;
         // 判断使用的图片是分类的图片还是全部图片
@@ -403,6 +416,26 @@ void MainWindow::clickPagingButton(int num, QListWidget *listWidget, QList<QPush
             imageList = mDataManagers[num-1]->getClassflyImagesOfPage(curPage);
             buttonCount = mDataManagers[num-1]->classflyTotalPage();
         }
+
+        for(auto& b : buttonList){
+            if(b != button){
+                b->setEnabled(true);
+                QFile file(":/qss/button.qss");
+                file.open(QFile::ReadOnly);
+                QString styleSheet = tr(file.readAll());
+                b->setStyleSheet(styleSheet);
+                file.close();
+
+            } else { // 将被点击的按钮设置为另一个样式
+                b->setEnabled(false);
+                QFile file(":/qss/clickedButton.qss");
+                file.open(QFile::ReadOnly);
+                QString styleSheet = tr(file.readAll());
+                b->setStyleSheet(styleSheet);
+                file.close();
+            }
+        }
+
 
         updateListWidget(mMainMenu, curPage, listWidget, imageList);
         // 更改分页工具栏的样式
@@ -433,18 +466,49 @@ void MainWindow::on_homeButton_clicked()
 {
     mMainMenu = MainMenu::HomePage;
     mImageSource = ImageSource::All;
-//    updateListWidget(mMainMenu, 1, ui->listWidget);
-//    changePagingButton(1, mHButtonList);
-    changePagingButton(mDataManagers[0]->curPage(), mHButtonList, mDataManagers[0]->totalPage());
-    ui->stackedWidget->setCurrentIndex(0);
 
+    // 初始化被点击的按钮
+    QFile file(":/qss/clickedButton.qss");
+    file.open(QFile::ReadOnly);
+    QString styleSheet = tr(file.readAll());
+
+    // 初始化第一个分页按钮的样式
+    mHButtonList[0]->setStyleSheet(styleSheet);
+//    mCButtonList[0]->setStyleSheet(styleSheet);
+    ui->homeButton->setStyleSheet(styleSheet);
+    ui->all->setStyleSheet(styleSheet);
+    file.close();
+
+    // 改变样式
+    QFile file1(":/qss/button.qss");
+    file1.open(QFile::ReadOnly);
+    styleSheet = tr(file1.readAll());
+    ui->collectButton->setStyleSheet(styleSheet);
+    for(int i = 1; i < mHButtonList.size(); ++i){
+        mHButtonList[i]->setStyleSheet(styleSheet);
+    }
+    file1.close();
+
+
+    // 初始化第一个分页按钮，首页中分类按钮的“全部”按钮，首页按钮和收藏按钮， 设置对应的点击状态
+    mHButtonList[0]->setEnabled(false);
+//    mCButtonList[0]->setEnabled(false);
+    ui->all->setEnabled(false);
     ui->homeButton->setEnabled(false);
     ui->collectButton->setEnabled(true);
+
+    // 更改为第一页的分页按钮样式
+    changePagingButton(1, mHButtonList, mDataManagers[0]->totalPage());
+    // 显示第一页的内容
+    updateListWidget(MainMenu::HomePage, 1, ui->listWidget, mDataManagers[0]->getImagesOfPage(1));
+
+    ui->stackedWidget->setCurrentIndex(0);
+
 }
 
 /*
  * 点击收藏按钮后，先更改mMainMenu的值，标识收藏页
- * 然后更新收藏页页面的图片，显示第二页
+ * 然后更新收藏页页面的图片，显示第一页
  * 再更改分页控件的布局
  * 最后显示收藏页
  */
@@ -452,21 +516,107 @@ void MainWindow::on_collectButton_clicked()
 {
     mMainMenu = MainMenu::CollectPage;
     mImageSource = ImageSource::All;
-//    updateListWidget(mMainMenu, 1, ui->listWidget_2);
-    changePagingButton(mDataManagers[1]->curPage(), mCButtonList, mDataManagers[1]->totalPage());
-    ui->stackedWidget->setCurrentIndex(1);
-    // 设置当前按钮不可点击
-    ui->collectButton->setEnabled(false);
+
+    // 初始化被点击的按钮
+    QFile file(":/qss/clickedButton.qss");
+    file.open(QFile::ReadOnly);
+    QString styleSheet = tr(file.readAll());
+
+    // 初始化第一个分页按钮的样式
+    mCButtonList[0]->setStyleSheet(styleSheet);
+    ui->collectButton->setStyleSheet(styleSheet);
+    file.close();
+
+    // 改变样式
+    QFile file1(":/qss/button.qss");
+    file1.open(QFile::ReadOnly);
+    styleSheet = tr(file1.readAll());
+    ui->homeButton->setStyleSheet(styleSheet);
+    for(int i = 1; i < mCButtonList.size(); ++i){
+        mCButtonList[i]->setStyleSheet(styleSheet);
+    }
+    file1.close();
+
+
+    // 初始化第一个分页按钮，设置对应的点击状态
+    mCButtonList[0]->setEnabled(false);
     ui->homeButton->setEnabled(true);
+    ui->collectButton->setEnabled(false);
+
+    changePagingButton(1, mCButtonList, mDataManagers[1]->totalPage());
+    updateListWidget(MainMenu::CollectPage, 1, ui->listWidget_2, mDataManagers[1]->getImagesOfPage(1));
+
+    ui->stackedWidget->setCurrentIndex(1);
 }
 
+/*
+ * 判断分类按钮是否点击，如果点击了设置该按钮不可点击，其他按钮可被点击
+ * 并设置样式
+ */
+void MainWindow::isClickClassflyButton(QPushButton* button){
+    QList<QPushButton*> buttonList;
+    buttonList.push_back(ui->all);
+    buttonList.push_back(ui->dongman);
+    buttonList.push_back(ui->dongwu);
+    buttonList.push_back(ui->fengjing);
+    buttonList.push_back(ui->jianyue);
+    buttonList.push_back(ui->youxi);
+    for(auto& b : buttonList){
+        if(b != button){
+            b->setEnabled(true);
+            QFile file(":/qss/button.qss");
+            file.open(QFile::ReadOnly);
+            QString styleSheet = tr(file.readAll());
+            b->setStyleSheet(styleSheet);
+            file.close();
+
+        } else { // 将被点击的按钮设置为另一个样式
+            b->setEnabled(false);
+            QFile file(":/qss/clickedButton.qss");
+            file.open(QFile::ReadOnly);
+            QString styleSheet = tr(file.readAll());
+            b->setStyleSheet(styleSheet);
+            file.close();
+        }
+    }
+    // 默认显示的第一页， 所以需要重新设置分页按钮
+    initHomeButtonList();
+}
+
+/*
+ * 初始化首页中的分页按钮，由addImageToListWidget创建
+ * 在点击分类按钮后会使用
+ * 将第一个按钮设置为不可点击，其他按钮设置为可点击
+ */
+void MainWindow::initHomeButtonList()
+{
+    for(int i = 0; i < mHButtonList.size(); ++i){
+        if(i != 0){
+            mHButtonList[i]->setEnabled(true);
+            QFile file(":/qss/button.qss");
+            file.open(QFile::ReadOnly);
+            QString styleSheet = tr(file.readAll());
+            mHButtonList[i]->setStyleSheet(styleSheet);
+            file.close();
+
+        } else { // 将被点击的按钮设置为另一个样式
+            mHButtonList[i]->setEnabled(false);
+            QFile file(":/qss/clickedButton.qss");
+            file.open(QFile::ReadOnly);
+            QString styleSheet = tr(file.readAll());
+            mHButtonList[i]->setStyleSheet(styleSheet);
+            file.close();
+        }
+    }
+
+}
 
 void MainWindow::on_all_clicked()
 {
     mImageSource = ImageSource::All;
+    isClickClassflyButton(ui->all);
     updateListWidget(MainMenu::HomePage, 1, ui->listWidget, mDataManagers[0]->getImagesOfPage(1));
     changePagingButton(1, mHButtonList, mDataManagers[0]->totalPage());
-
 }
 
 
@@ -474,6 +624,7 @@ void MainWindow::on_dongman_clicked()
 {
     mImageSource = ImageSource::Classfly;
     mDataManagers[0]->getClassflyImages("动漫");
+    isClickClassflyButton(ui->dongman);
     changePagingButton(1, mHButtonList, mDataManagers[0]->classflyTotalPage());
     updateListWidget(MainMenu::HomePage, 1, ui->listWidget, mDataManagers[0]->getClassflyImagesOfPage(1));
 
@@ -484,6 +635,7 @@ void MainWindow::on_dongwu_clicked()
 {
     mImageSource = ImageSource::Classfly;
     mDataManagers[0]->getClassflyImages("动物");
+    isClickClassflyButton(ui->dongwu);
     changePagingButton(1, mHButtonList, mDataManagers[0]->classflyTotalPage());
     updateListWidget(MainMenu::HomePage, 1, ui->listWidget, mDataManagers[0]->getClassflyImagesOfPage(1));
 
@@ -494,6 +646,7 @@ void MainWindow::on_fengjing_clicked()
 {
     mImageSource = ImageSource::Classfly;
     mDataManagers[0]->getClassflyImages("风景");
+    isClickClassflyButton(ui->fengjing);
     changePagingButton(1, mHButtonList, mDataManagers[0]->classflyTotalPage());
     updateListWidget(MainMenu::HomePage, 1, ui->listWidget, mDataManagers[0]->getClassflyImagesOfPage(1));
 
@@ -504,6 +657,7 @@ void MainWindow::on_jianyue_clicked()
 {
     mImageSource = ImageSource::Classfly;
     mDataManagers[0]->getClassflyImages("简约");
+    isClickClassflyButton(ui->jianyue);
     changePagingButton(1, mHButtonList, mDataManagers[0]->classflyTotalPage());
     updateListWidget(MainMenu::HomePage, 1, ui->listWidget, mDataManagers[0]->getClassflyImagesOfPage(1));
 
@@ -514,6 +668,7 @@ void MainWindow::on_youxi_clicked()
 {
     mImageSource = ImageSource::Classfly;
     mDataManagers[0]->getClassflyImages("游戏");
+    isClickClassflyButton(ui->youxi);
     changePagingButton(1, mHButtonList, mDataManagers[0]->classflyTotalPage());
     updateListWidget(MainMenu::HomePage, 1, ui->listWidget, mDataManagers[0]->getClassflyImagesOfPage(1));
 
@@ -534,5 +689,113 @@ void MainWindow::on_searchButton_clicked()
     }
     updateListWidget(MainMenu::HomePage, 1, listWidget, mDataManagers[num-1]->getClassflyImagesOfPage(1));
 
+}
+
+void MainWindow::addCollection(ImageInfoItem* imageItem){
+    QFileInfo imageInfo(imageItem->path());
+    QImage image(imageInfo.filePath());
+
+    // 构造文件名
+    QString fileName = "D:\\CandC++\\C++\\wallpaper\\collect\\默认\\" + imageInfo.fileName();
+
+    // 创建文件对象
+    QFile file(fileName);
+
+    // 打开文件（只写模式）
+    if (file.open(QIODevice::WriteOnly))
+    {
+        // 保存图片到文件
+        if (image.save(&file)){
+            // 关闭文件
+            file.close();
+        }else{
+            // 保存失败
+            file.close();
+            QMessageBox::information(this, tr("小亦壁纸"),
+                                 tr("收藏失败.\n"));
+        }
+    }else{
+        // 打开文件失败
+    }
+    updateCollection();
+}
+
+void MainWindow::removeCollection(ImageInfoItem* imageItem){
+
+    QString filePath = imageItem->path();
+    // 创建QFileInfo对象
+    QFileInfo fileInfo(filePath);
+
+    int ret = QMessageBox::warning(this, tr("小亦壁纸"),
+                                   tr("删除后该图片将不会出现在文件夹中.\n"
+                                      "是否确定要删除？"),
+                                   QMessageBox::Ok | QMessageBox::Cancel,
+                                   QMessageBox::Ok);
+
+    switch (ret) {
+    case QMessageBox::Ok:
+        // Save was clicked
+        // 检查文件是否存在
+        if (fileInfo.exists()){
+            // 创建QFile对象
+            QFile file(filePath);
+
+            // 删除文件
+            if (file.remove()){
+                QMessageBox::information(this, tr("小亦壁纸"),
+                                         tr("删除成功.\n"));
+                // 更新收藏页视图
+                updateCollection();
+                // 还需要更新分页按钮
+                changePagingButton(1, mCButtonList, mDataManagers[1]->totalPage());
+                break;
+            }else{
+                // 删除失败
+                QMessageBox::information(this, tr("小亦壁纸"),
+                                         tr("删除失败.\n"));
+                break;
+            }
+        }else{
+            // 文件不存在
+            QMessageBox::information(this, tr("小亦壁纸"),
+                                     tr("文件不存在.\n"));
+            break;
+        }
+    case QMessageBox::Cancel:
+        // Cancel was clicked
+        break;
+    default:
+        // should never be reached
+        break;
+    }
+}
+
+
+void MainWindow::updateCollection(){
+
+    for(int i = 0 ;i < ui->listWidget_2->count(); ++i)
+        //这里是0，不是i，因为每移除一个item都会导致每个item的row发生变化
+        delete ui->listWidget_2->takeItem(0);
+
+    ui->listWidget_2->clear();
+    qDebug() << ui->listWidget_2->count();
+    for(auto& button : mCButtonList)
+        delete button;
+    mCButtonList.clear();
+    delete mDataManagers[1];
+    mDataManagers.pop_back();
+    // 更新收藏页
+    addImageToListWidget(MainMenu::CollectPage, ui->listWidget_2, mCButtonList);
+
+    // 设置样式表
+    QFile file(":/qss/clickedButton.qss");
+    file.open(QFile::ReadOnly);
+    QString styleSheet = tr(file.readAll());
+    mCButtonList[0]->setStyleSheet(styleSheet);
+    file.close();
+
+    mCButtonList[0]->setEnabled(false);
+    // 给item绑定真实数据,默认更新第一页的数据
+    updateListWidget(MainMenu::CollectPage, 1, ui->listWidget_2, mDataManagers[1]->getImagesOfPage(1));
 }
 

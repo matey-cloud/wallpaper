@@ -8,6 +8,7 @@
         <file>logo.ico</file>
     </qresource>
     <qresource prefix="/qss">
-        <file>scrollbar.qss</file>
+        <file>clickedButton.qss</file>
+        <file>button.qss</file>
     </qresource>
 </RCC>

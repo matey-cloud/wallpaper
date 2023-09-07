@@ -32,18 +32,31 @@ public:
 
     void addImage(ImageDataInfo &info);
 
-private:
+    QString path() const{ return mPath; }
+
+    QString imageName() const{ return mImageName; }
+
+    // 设置当前图片为桌面壁纸
+    void setWallPaper();
+
     void addImage();
     void contextMenuEvent(QContextMenuEvent *event);
-    void setWallPaper();
 
     void mousePressEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
     void enterEvent(QEnterEvent *event);
     void leaveEvent(QEvent *event);
 
+    void RightClickMenu(int num);
+signals:
+    void clickCollectMenu(ImageInfoItem*);
+
 private:
     Ui::ImageInfoItem *ui;
+
+    QMenu mMenu;
+    QAction *mAction1;
+    QAction *mAction2;
 
     QPixmap mImagePixmap;
     QLabel *mImageInfo; // 显示图片信息

@@ -6,9 +6,6 @@
 #include "datamanager.h"
 #include <QDebug>
 
-const static QString homePath = "D:\\CandC++\\C++\\images";
-const static QString colloetPath = "D:\\CandC++\\C++\\wallpaper\\collect";
-
 
 DataManager::DataManager()
     : mCurPage(1)
@@ -28,10 +25,10 @@ void DataManager::getImages(int num)
 {
     QString folderPath;
     if(num == 1){
-        folderPath = homePath;
+        folderPath = smHomePath;
     }
     else if(num == 2){
-        folderPath = colloetPath;
+        folderPath = smColloetPath;
     }
     // 读取文件夹中的文件
     QDir folderDir(folderPath);
@@ -50,6 +47,10 @@ void DataManager::getImages(int num)
             mFileList.push_back(imageInfo);
         }
     }
+    CalculateImageAndPageCount();
+}
+
+void DataManager::CalculateImageAndPageCount(){
     // 一共的图片数量
     mTotalImage = mFileList.count();
     // 计算页数
@@ -60,7 +61,6 @@ void DataManager::getImages(int num)
     } else{
         mTotalPage = (mTotalImage / mPageImageNum) + 1;
     }
-
 }
 
 QList<ImageDataInfo> DataManager::getImagesOfPage(int page)
