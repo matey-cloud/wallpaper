@@ -62,6 +62,7 @@ private:
     QLabel *mImageInfo; // 显示图片信息
     QString mImageName;//当前图片的名称
     QString mPath;//当前图片的路径
+    QSize mSize;
 };
 
 #endif // IMAGEINFOITEM_H

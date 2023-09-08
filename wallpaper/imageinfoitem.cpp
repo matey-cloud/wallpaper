@@ -31,6 +31,8 @@ void ImageInfoItem::addImage(ImageDataInfo &info)
     //    QString curPhoto = "图片名称 " + info.getPhotoName();
     mImageName = info.getPhotoName();
     mPath = info.getPath();
+    mSize = info.size();
+    qDebug() << "mSize = " << mSize;
     addImage();
 }
 
@@ -43,7 +45,8 @@ void ImageInfoItem::addImage()
     }
     // 需要调整图片大小适应 QLabel 大小
     // 第二个参数为填满， 为默认参数
-    QPixmap scaledImage = image.scaled(this->size(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    QPixmap scaledImage = image.scaled(mSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+
     mImagePixmap = scaledImage;
 
     // 清空

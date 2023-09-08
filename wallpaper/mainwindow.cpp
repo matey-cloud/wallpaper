@@ -183,6 +183,8 @@ void MainWindow::addImageToListWidget(MainMenu mainMenu, QListWidget* listWidget
 
     // 读取对应num的图片文件夹, 并计算有多少页
     mDataManagers[num-1]->getImages(num);
+    // 规定每张图片在item中的大小
+    mDataManagers[num-1]->setImageSize(itemSize);
     // 获取有多少页
     int pages = mDataManagers[num-1]->totalPage();
 

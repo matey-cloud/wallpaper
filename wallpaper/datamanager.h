@@ -44,7 +44,12 @@ public:
 
     // 计算图片数量和页数量
     void CalculateImageAndPageCount();
+    QSize imageSize() const { return mImageSize; }
+    void setImageSize(const QSize &newImageSize) { mImageSize = newImageSize; }
+
 private:
+    QSize mImageSize;
+
     int mCurPage; // 当前显示页
     int mTotalPage;// 一共多少页图片
     int mTotalImage; // 一共多少张图片

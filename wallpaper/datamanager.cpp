@@ -63,6 +63,7 @@ void DataManager::CalculateImageAndPageCount(){
     }
 }
 
+
 QList<ImageDataInfo> DataManager::getImagesOfPage(int page)
 {
     QList<ImageDataInfo> imageItemList;
@@ -81,6 +82,8 @@ QList<ImageDataInfo> DataManager::getImagesOfPage(int page)
         QString imageName = mFileList[i - 1].baseName();// 文件名没有后缀
         info.setPath(mFileList[i - 1].filePath());
         info.setPhotoName(imageName);
+        info.setSize(mImageSize); // 设置图片的大小
+
         imageItemList.push_back(info);
     }
     return imageItemList;
