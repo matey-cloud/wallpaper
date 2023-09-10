@@ -71,6 +71,12 @@ public:
     void addImageToListWidget(MainMenu mainMenu, QListWidget *listWidget, QList<QPushButton *> &buttonList);
 
     /*
+     * 为对应的listWidget和buttonList添加按钮和item
+     * 一个按钮对应smItemNum个item
+     */
+    void addButtonAndItem(const int index, QListWidget *listWidget, QList<QPushButton *> &buttonList);
+
+    /*
      * 更新对应菜单下的page页的图片
      */
     void updateListWidget(MainMenu mainMenu, int page, QListWidget *listWidget, QList<ImageDataInfo> imageInfoList);
@@ -120,6 +126,7 @@ private:
     /*
      * 将图片添加到收藏夹中或者从收藏夹中去除后
      * 需要重新更新收藏夹的内容
+     * 如：页数比之前多或少，按钮需要添加或者删除
      */
     void updateCollection();
 

@@ -53,10 +53,11 @@ void DataManager::getImages(int num)
 void DataManager::CalculateImageAndPageCount(){
     // 一共的图片数量
     mTotalImage = mFileList.count();
+    qDebug() << "56 mFileList.count() " << mFileList.count();
     // 计算页数
     if(mTotalImage < mPageImageNum){
         mTotalPage = 1;
-    } else if(mTotalImage / mPageImageNum == 0){
+    } else if(mTotalImage % mPageImageNum == 0){
         mTotalPage = mTotalImage / mPageImageNum;
     } else{
         mTotalPage = (mTotalImage / mPageImageNum) + 1;
@@ -81,7 +82,7 @@ QList<ImageDataInfo> DataManager::getImagesOfPage(int page)
         ImageDataInfo info;
         QString imageName = mFileList[i - 1].baseName();// 文件名没有后缀
         info.setPath(mFileList[i - 1].filePath());
-        info.setPhotoName(imageName);
+        info.setImageName(imageName);
         info.setSize(mImageSize); // 设置图片的大小
 
         imageItemList.push_back(info);
@@ -133,12 +134,12 @@ QList<ImageDataInfo> DataManager::getClassflyImagesOfPage(int page)
         ImageDataInfo info;
         QString imageName = mFileClassflyList.at(i-1).baseName();// 文件名没有后缀
         info.setPath(mFileClassflyList.at(i-1).filePath());
-        info.setPhotoName(imageName);
+        info.setImageName(imageName);
+        info.setSize(mImageSize); // 设置图片的大小
         imageItemList.push_back(info);
     }
     return imageItemList;
 }
-
 
 
 

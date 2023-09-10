@@ -13,12 +13,6 @@
 
 #include "imagedatainfo.h"
 
-//// 描述主菜单的状态
-//enum class MainMenu{
-//    HomePage,
-//    CollectPage
-//};
-
 class DataManager
 {
 public:
@@ -37,8 +31,9 @@ public:
     void setCurPage(int newCurPage) { mCurPage = newCurPage; } // 设置当前显示页
     int curPage() const { return mCurPage; } // 获取当前显示页
     int totalPage() const { return mTotalPage; } // 获取一共多少页
+    int totalImage() const { return mTotalImage; } // 获取一共多少张图片
     void setPageImageNum(int newPageImageNum){ mPageImageNum = newPageImageNum; }
-    QFileInfoList fileList() const{ return mFileList; }
+    QFileInfoList& fileList() { return mFileList; }
 
     int classflyTotalPage() const { return mClassflyTotalPage; }// 获取当前分类一共多少页
 
@@ -46,6 +41,10 @@ public:
     void CalculateImageAndPageCount();
     QSize imageSize() const { return mImageSize; }
     void setImageSize(const QSize &newImageSize) { mImageSize = newImageSize; }
+
+    // 修改后并没有改变成员变量mTotalImage， mTotalPage
+    void pushFront(QFileInfo& image){ mFileList.push_front(image); }
+    void popIndex(const int index){ mFileList.removeAt(index); }
 
 private:
     QSize mImageSize;

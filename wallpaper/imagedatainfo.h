@@ -12,9 +12,9 @@ class ImageDataInfo
 {
 public:
     ImageDataInfo();
-    QString getPhotoName() const{ return mPhotoName; }
+    QString getImageName() const{ return mImageName; }
     QString getPath() const { return mPath; }
-    void setPhotoName(const QString &newPhotoName){ mPhotoName = newPhotoName; }
+    void setImageName(const QString &newImageName){ mImageName = newImageName; }
     void setPath(const QString &newPath){ mPath = newPath; }
 
 
@@ -23,7 +23,7 @@ public:
 
 private:
     QByteArray mImageData; // 图片的二进制数据
-    QString mPhotoName;
+    QString mImageName;
     QString mPath;
     QSize mSize; // 图片的大小
 };

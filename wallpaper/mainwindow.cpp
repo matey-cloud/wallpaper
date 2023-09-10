@@ -42,15 +42,15 @@ MainWindow::MainWindow(QWidget *parent)
     // 默认显示首页的内容
     on_homeButton_clicked();
 
-//    // 给item绑定真实数据,默认更新第一页的数据
-//    updateListWidget(MainMenu::HomePage, 1, ui->listWidget, mDataManagers[0]->getImagesOfPage(1));
-//    // 设置按钮在首页中默认的显示规则,从按钮1开始
-//    changePagingButton(1, mHButtonList, mDataManagers[0]->totalPage());
+    //    // 给item绑定真实数据,默认更新第一页的数据
+    //    updateListWidget(MainMenu::HomePage, 1, ui->listWidget, mDataManagers[0]->getImagesOfPage(1));
+    //    // 设置按钮在首页中默认的显示规则,从按钮1开始
+    //    changePagingButton(1, mHButtonList, mDataManagers[0]->totalPage());
 
-//    updateListWidget(MainMenu::CollectPage, 1, ui->listWidget_2, mDataManagers[1]->getImagesOfPage(1));
+    //    updateListWidget(MainMenu::CollectPage, 1, ui->listWidget_2, mDataManagers[1]->getImagesOfPage(1));
 
-//    // 显示首页
-//    ui->stackedWidget->setCurrentIndex(0);
+    //    // 显示首页
+    //    ui->stackedWidget->setCurrentIndex(0);
 
 }
 
@@ -169,7 +169,7 @@ int MainWindow::getCurMenuNum(MainMenu mainMenu){
  * 根据当前菜单获取num值，num-1是mDatamanagers的索引
  * 并根据num值来获取对应菜单内容的页数
  * 每个页面对应一个按钮，添加到buttonList中，
- * 一个页面对应6个ImageInfoItem，即6张图片，对每一页初始化
+ * 一个页面对应9个ImageInfoItem，即6张图片，对每一页初始化
  */
 void MainWindow::addImageToListWidget(MainMenu mainMenu, QListWidget* listWidget, QList<QPushButton *> &buttonList)
 {
@@ -189,36 +189,70 @@ void MainWindow::addImageToListWidget(MainMenu mainMenu, QListWidget* listWidget
     int pages = mDataManagers[num-1]->totalPage();
 
     for(int n = 1; n <= pages; ++n){
-        // 每页创建一个按钮
-        QPushButton* button = new QPushButton(QString::number(n));// 按钮以页数命名
-        button->setFixedSize(35, 35); // 设置按钮大小
+        //        // 每页创建一个按钮
+        //        QPushButton* button = new QPushButton(QString::number(n));// 按钮以页数命名
+        //        button->setFixedSize(35, 35); // 设置按钮大小
 
-        // 设置样式表
-        QFile file(":/qss/button.qss");
-        file.open(QFile::ReadOnly);
-        QString styleSheet = tr(file.readAll());
-        button->setStyleSheet(styleSheet);
-        file.close();
+        //        // 设置样式表
+        //        QFile file(":/qss/button.qss");
+        //        file.open(QFile::ReadOnly);
+        //        QString styleSheet = tr(file.readAll());
+        //        button->setStyleSheet(styleSheet);
+        //        file.close();
 
-        //绑定分页按钮点击事件
-        QObject::connect(button, &QPushButton::clicked, this, &MainWindow::clickPaging);
-        button->setVisible(false);
-        buttonList.append(button); // buttonList.push_back(button)，将按钮添加到按钮列表末尾
+        //        //绑定分页按钮点击事件
+        //        QObject::connect(button, &QPushButton::clicked, this, &MainWindow::clickPaging);
+        //        button->setVisible(false);
+        //        buttonList.append(button); // buttonList.push_back(button)，将按钮添加到按钮列表末尾
 
-        // 创建单元项
-        // 这里创建的Item使用的背景图是样式表中的默认背景图
-        for (int i = 0; i < smItemNum; ++i)
-        {
-            QListWidgetItem *item = new QListWidgetItem(listWidget);
-            ImageInfoItem *widget = new ImageInfoItem;
-            item->setSizeHint(itemSize);
-            listWidget->addItem(item);
-            //最重要的是这句将Item设置为一个Widget，而这个Widget就是自定义的ui
-            //将ImageInfoItem部件与相应的QListWidgetItem关联起来
-            listWidget->setItemWidget(item, widget);
-        }
+        //        // 创建单元项
+        //        // 这里创建的Item使用的背景图是样式表中的默认背景图
+        //        for (int i = 0; i < smItemNum; ++i)
+        //        {
+        //            QListWidgetItem *item = new QListWidgetItem(listWidget);
+        //            ImageInfoItem *widget = new ImageInfoItem;
+        //            item->setSizeHint(itemSize);
+        //            listWidget->addItem(item);
+        //            //最重要的是这句将Item设置为一个Widget，而这个Widget就是自定义的ui
+        //            //将ImageInfoItem部件与相应的QListWidgetItem关联起来
+        //            listWidget->setItemWidget(item, widget);
+        //        }
+
+        addButtonAndItem(n, listWidget, buttonList);
     }
 }
+
+void MainWindow::addButtonAndItem(const int index, QListWidget* listWidget, QList<QPushButton *> &buttonList){
+    // 每页创建一个按钮
+    QPushButton* button = new QPushButton(QString::number(index));// 按钮以页数命名
+    button->setFixedSize(35, 35); // 设置按钮大小
+
+    // 设置样式表
+    QFile file(":/qss/button.qss");
+    file.open(QFile::ReadOnly);
+    QString styleSheet = tr(file.readAll());
+    button->setStyleSheet(styleSheet);
+    file.close();
+
+    //绑定分页按钮点击事件
+    QObject::connect(button, &QPushButton::clicked, this, &MainWindow::clickPaging);
+    button->setVisible(false);
+    buttonList.append(button); // buttonList.push_back(button)，将按钮添加到按钮列表末尾
+
+    // 创建单元项
+    // 这里创建的Item使用的背景图是样式表中的默认背景图
+    for (int i = 0; i < smItemNum; ++i)
+    {
+        QListWidgetItem *item = new QListWidgetItem(listWidget);
+        ImageInfoItem *widget = new ImageInfoItem;
+        item->setSizeHint(listWidget->iconSize());
+        listWidget->addItem(item);
+        //最重要的是这句将Item设置为一个Widget，而这个Widget就是自定义的ui
+        //将ImageInfoItem部件与相应的QListWidgetItem关联起来
+        listWidget->setItemWidget(item, widget);
+    }
+}
+
 
 /*
  * imageInfoList是该页需要的图片
@@ -255,10 +289,18 @@ void MainWindow::updateListWidget(MainMenu mainMenu, int page, QListWidget* list
             // 设置 ImageInfoItem 作为 QListWidgetItem 的自定义小部件
             listWidget->setItemWidget(item, imageInfoItem);
 
-            if(num == 1)
+            /* 为对应的item绑定槽函数， 需要先解除再绑定
+             * 因为在添加或者删除图片后，该位置的item显示的其他图片又进行了一次绑定
+             * 所以需要先解除再绑定来阻止槽函数执行多次的原因
+             */
+            if(num == 1){
+                QObject::disconnect(imageInfoItem, SIGNAL(clickCollectMenu(ImageInfoItem*)), this, SLOT(addCollection(ImageInfoItem*)));
                 QObject::connect(imageInfoItem, SIGNAL(clickCollectMenu(ImageInfoItem*)), this, SLOT(addCollection(ImageInfoItem*)));
-            else if(num == 2)
+            }
+            else if(num == 2){
+                QObject::disconnect(imageInfoItem, SIGNAL(clickCollectMenu(ImageInfoItem*)), this, SLOT(removeCollection(ImageInfoItem*)));
                 QObject::connect(imageInfoItem, SIGNAL(clickCollectMenu(ImageInfoItem*)), this, SLOT(removeCollection(ImageInfoItem*)));
+            }
         }
     }
 
@@ -476,7 +518,7 @@ void MainWindow::on_homeButton_clicked()
 
     // 初始化第一个分页按钮的样式
     mHButtonList[0]->setStyleSheet(styleSheet);
-//    mCButtonList[0]->setStyleSheet(styleSheet);
+    //    mCButtonList[0]->setStyleSheet(styleSheet);
     ui->homeButton->setStyleSheet(styleSheet);
     ui->all->setStyleSheet(styleSheet);
     file.close();
@@ -494,7 +536,7 @@ void MainWindow::on_homeButton_clicked()
 
     // 初始化第一个分页按钮，首页中分类按钮的“全部”按钮，首页按钮和收藏按钮， 设置对应的点击状态
     mHButtonList[0]->setEnabled(false);
-//    mCButtonList[0]->setEnabled(false);
+    //    mCButtonList[0]->setEnabled(false);
     ui->all->setEnabled(false);
     ui->homeButton->setEnabled(false);
     ui->collectButton->setEnabled(true);
@@ -697,29 +739,37 @@ void MainWindow::addCollection(ImageInfoItem* imageItem){
     QFileInfo imageInfo(imageItem->path());
     QImage image(imageInfo.filePath());
 
-    // 构造文件名
-    QString fileName = "D:\\CandC++\\C++\\wallpaper\\collect\\默认\\" + imageInfo.fileName();
+    // 构造文件名, 当前文件在收藏夹中的路径
+    QString curFileName = "D:\\CandC++\\C++\\wallpaper\\collect\\默认\\" + imageInfo.fileName();
 
     // 创建文件对象
-    QFile file(fileName);
+    QFile file(curFileName);
 
-    // 打开文件（只写模式）
-    if (file.open(QIODevice::WriteOnly))
+    // 打开文件（读写模式）
+    if (file.open(QIODevice::ReadWrite))
     {
         // 保存图片到文件
         if (image.save(&file)){
             // 关闭文件
             file.close();
+
+            // push的图片是需要收藏夹的路径
+            QFileInfo newImageInfo(curFileName);
+            qDebug() << "768 newImageInfo " << newImageInfo;
+
+            mDataManagers[1]->pushFront(newImageInfo);
+            // 更新收藏夹视图
+            updateCollection();
         }else{
             // 保存失败
             file.close();
             QMessageBox::information(this, tr("小亦壁纸"),
-                                 tr("收藏失败.\n"));
+                                     tr("收藏失败.\n"));
         }
     }else{
         // 打开文件失败
     }
-    updateCollection();
+
 }
 
 void MainWindow::removeCollection(ImageInfoItem* imageItem){
@@ -746,10 +796,24 @@ void MainWindow::removeCollection(ImageInfoItem* imageItem){
             if (file.remove()){
                 QMessageBox::information(this, tr("小亦壁纸"),
                                          tr("删除成功.\n"));
+                // 删除收藏夹的图片链表中指定的图片
+                qDebug() << "808 mDataManagers[1]->totalImage() = " << mDataManagers[1]->totalImage();
+                QFileInfoList& fileList = mDataManagers[1]->fileList();
+                qDebug() << "810 mDataManagers[1]->totalImage() = " << fileList.size();
+                for(int i = 0; i < fileList.size(); i++){
+                    if(fileList[i].baseName() == imageItem->imageName()){
+                        qDebug() << fileList[i].absoluteFilePath();
+                        fileList.remove(i);
+
+                    }
+                }
+
                 // 更新收藏页视图
                 updateCollection();
-                // 还需要更新分页按钮
-                changePagingButton(1, mCButtonList, mDataManagers[1]->totalPage());
+
+                qDebug() << "816 mDataManagers[1]->totalImage() = " << mDataManagers[1]->totalImage();
+                qDebug() << "817 mDataManagers[1]->totalImage() = " << fileList.size();
+
                 break;
             }else{
                 // 删除失败
@@ -772,32 +836,37 @@ void MainWindow::removeCollection(ImageInfoItem* imageItem){
     }
 }
 
-
+/*
+ * 新增图片到收藏夹或者从收藏夹中去除图片
+ * 之后需要修改收藏夹的内容
+ */
 void MainWindow::updateCollection(){
+    // 获取旧的页总数
+    int oldPageCount = mDataManagers[1]->totalPage();
+    // 计算新的页总数
+    mDataManagers[1]->CalculateImageAndPageCount();
+    // 获取新的页总数
+    int newPageCount = mDataManagers[1]->totalPage();
 
-    for(int i = 0 ;i < ui->listWidget_2->count(); ++i)
-        //这里是0，不是i，因为每移除一个item都会导致每个item的row发生变化
-        delete ui->listWidget_2->takeItem(0);
+    qDebug() << "oldPageCount = " << oldPageCount;
+    qDebug() << "newPageCount = " << newPageCount;
 
-    ui->listWidget_2->clear();
-    qDebug() << ui->listWidget_2->count();
-    for(auto& button : mCButtonList)
-        delete button;
-    mCButtonList.clear();
-    delete mDataManagers[1];
-    mDataManagers.pop_back();
-    // 更新收藏页
-    addImageToListWidget(MainMenu::CollectPage, ui->listWidget_2, mCButtonList);
+    if(oldPageCount == newPageCount){
+        // 什么都不做
 
-    // 设置样式表
-    QFile file(":/qss/clickedButton.qss");
-    file.open(QFile::ReadOnly);
-    QString styleSheet = tr(file.readAll());
-    mCButtonList[0]->setStyleSheet(styleSheet);
-    file.close();
+    } else if (oldPageCount < newPageCount){
+        // 页数增加，需要添加一个按钮
+        // 号数即是页总数
+        addButtonAndItem(newPageCount, ui->listWidget_2, mCButtonList);
+    } else{
+        // 页数减少，删除一个按钮
+        QPushButton* removeButon = mCButtonList[mCButtonList.size()-1];
+        mCButtonList.pop_back();
+        delete removeButon;
+    }
 
-    mCButtonList[0]->setEnabled(false);
-    // 给item绑定真实数据,默认更新第一页的数据
     updateListWidget(MainMenu::CollectPage, 1, ui->listWidget_2, mDataManagers[1]->getImagesOfPage(1));
-}
+    // 还需要更新分页按钮
+    changePagingButton(1, mCButtonList, mDataManagers[1]->totalPage());
 
+}

@@ -29,7 +29,7 @@ ImageInfoItem::~ImageInfoItem()
 void ImageInfoItem::addImage(ImageDataInfo &info)
 {
     //    QString curPhoto = "图片名称 " + info.getPhotoName();
-    mImageName = info.getPhotoName();
+    mImageName = info.getImageName();
     mPath = info.getPath();
     mSize = info.size();
     qDebug() << "mSize = " << mSize;
