@@ -740,7 +740,7 @@ void MainWindow::addCollection(ImageInfoItem* imageItem){
     QImage image(imageInfo.filePath());
 
     // 构造文件名, 当前文件在收藏夹中的路径
-    QString curFileName = "D:\\CandC++\\C++\\wallpaper\\collect\\默认\\" + imageInfo.fileName();
+    QString curFileName = mDataManagers[1]->collectPath() + imageInfo.fileName();
 
     // 创建文件对象
     QFile file(curFileName);
@@ -755,8 +755,6 @@ void MainWindow::addCollection(ImageInfoItem* imageItem){
 
             // push的图片是需要收藏夹的路径
             QFileInfo newImageInfo(curFileName);
-            qDebug() << "768 newImageInfo " << newImageInfo;
-
             mDataManagers[1]->pushFront(newImageInfo);
             // 更新收藏夹视图
             updateCollection();
@@ -848,8 +846,6 @@ void MainWindow::updateCollection(){
     // 获取新的页总数
     int newPageCount = mDataManagers[1]->totalPage();
 
-    qDebug() << "oldPageCount = " << oldPageCount;
-    qDebug() << "newPageCount = " << newPageCount;
 
     if(oldPageCount == newPageCount){
         // 什么都不做

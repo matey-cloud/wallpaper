@@ -10,14 +10,16 @@
 #include <QList>
 #include <QFileInfo>
 #include <QDir>
+#include <QSettings>
 
 #include "imagedatainfo.h"
 
 class DataManager
 {
 public:
-    inline static const QString smHomePath = "D:\\CandC++\\C++\\wallpaper\\images";
-    inline static const QString smColloetPath = "D:\\CandC++\\C++\\wallpaper\\collect";
+
+//    inline static const QString smHomePath = "D:\\CandC++\\C++\\wallpaper\\images";
+//    inline static const QString smColloetPath = "D:\\CandC++\\C++\\wallpaper\\collect";
 
     DataManager();
 
@@ -46,8 +48,14 @@ public:
     void pushFront(QFileInfo& image){ mFileList.push_front(image); }
     void popIndex(const int index){ mFileList.removeAt(index); }
 
+    QString collectPath() const;
+    void setCollectPath(const QString &newCollectPath);
+
 private:
     QSize mImageSize;
+
+    QString mHomePath;
+    QString mCollectPath;
 
     int mCurPage; // 当前显示页
     int mTotalPage;// 一共多少页图片

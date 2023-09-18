@@ -17,6 +17,18 @@ DataManager::DataManager()
     , mClassflyTotalImage(0)
 {
 
+    QSettings settings("./wallpaper.ini",QSettings::IniFormat);
+    QString path = QDir::currentPath();
+    settings.beginGroup("HomePath");
+//    settings.setValue("homepath", path + "/images");
+    mHomePath = settings.value("homepath").toString();
+    settings.endGroup();
+
+    settings.beginGroup("CollectPath");
+//    settings.setValue("collectpath", path + "/collect");
+    mCollectPath = settings.value("collectpath").toString();
+    settings.endGroup();
+
     mFileList.clear();
     mFileClassflyList.clear();
 }
@@ -24,36 +36,48 @@ DataManager::DataManager()
 void DataManager::getImages(int num)
 {
     QString folderPath;
-    if(num == 1){
-        folderPath = smHomePath;
-    }
-    else if(num == 2){
-        folderPath = smColloetPath;
-    }
-    // 读取文件夹中的文件
-    QDir folderDir(folderPath);
-    folderDir.setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
-    QFileInfoList folderList = folderDir.entryInfoList();
-    foreach(const QFileInfo& folderInfo, folderList)
-    {
-        QString folderPath = folderInfo.absoluteFilePath();
-        // 遍历分类文件夹中的图片
-        QDir imagesDir(folderPath);
-        imagesDir.setFilter(QDir::Files);
-        imagesDir.setNameFilters(QStringList() << "*.jpg" << "*.png" << "*.jpeg"); // 添加对应的图片格式过滤条件
-        QFileInfoList imageList = imagesDir.entryInfoList();
-        foreach(const QFileInfo& imageInfo, imageList)
+    if(num == 1){ // 首页
+        folderPath = mHomePath;
+        // 读取文件夹中的文件
+        QDir folderDir(folderPath);
+        folderDir.setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
+        QFileInfoList folderList = folderDir.entryInfoList();
+        foreach(const QFileInfo& folderInfo, folderList)
         {
-            mFileList.push_back(imageInfo);
+            QString folderPath = folderInfo.absoluteFilePath();
+            // 遍历分类文件夹中的图片
+            QDir imagesDir(folderPath);
+            imagesDir.setFilter(QDir::Files);
+            imagesDir.setNameFilters(QStringList() << "*.jpg" << "*.png" << "*.jpeg"); // 添加对应的图片格式过滤条件
+            QFileInfoList imageList = imagesDir.entryInfoList();
+            foreach(const QFileInfo& imageInfo, imageList)
+            {
+                mFileList.push_back(imageInfo);
+            }
         }
     }
+    else if(num == 2){ // 收藏夹
+        folderPath = mCollectPath;
+        // 读取文件夹中的文件
+        QDir folderDir(folderPath);
+        qDebug() << "folderPath " << folderPath;
+        folderDir.setFilter(QDir::Files);
+        folderDir.setNameFilters(QStringList() << "*.jpg" << "*.png" << "*.jpeg"); // 添加对应的图片格式过滤条件
+        QFileInfoList folderList = folderDir.entryInfoList();
+        foreach(const QFileInfo& folderInfo, folderList)
+        {
+
+                mFileList.push_back(folderInfo);
+
+        }
+    }
+
     CalculateImageAndPageCount();
 }
 
 void DataManager::CalculateImageAndPageCount(){
     // 一共的图片数量
     mTotalImage = mFileList.count();
-    qDebug() << "56 mFileList.count() " << mFileList.count();
     // 计算页数
     if(mTotalImage < mPageImageNum){
         mTotalPage = 1;
@@ -62,6 +86,16 @@ void DataManager::CalculateImageAndPageCount(){
     } else{
         mTotalPage = (mTotalImage / mPageImageNum) + 1;
     }
+}
+
+QString DataManager::collectPath() const
+{
+    return mCollectPath;
+}
+
+void DataManager::setCollectPath(const QString &newCollectPath)
+{
+    mCollectPath = newCollectPath;
 }
 
 
